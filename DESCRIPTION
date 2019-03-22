@@ -1,0 +1,22 @@
+Package: tgR
+Type: Package
+Title: TGR Convenience Functions
+Version: 0.1.0
+Author: Amy Paguirigan
+Maintainer: Amy Paguirigan <apaguiri@fredhutch.org>
+Description: This package provides helper functions needed to coordinate between various aspects of repository.
+  Functions assist in interacting with the REDCap API, GitHub API, Cromwell and AWS S3.  All credentials required will
+  need to be in your environment for this package to work and you must run "setCreds()" first.  
+License: MIT + file LICENSE
+Depends: R (>= 3.5)
+Imports: 
+    httr,
+    REDCapR,
+    aws.s3,
+    jsonlite,
+    magrittr,
+    dplyr,
+    purrr
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
