@@ -8,7 +8,7 @@ redcapPull(DAG = c("paguirigana", "bergera"), domain = "all",
   harmonizedOnly = FALSE, evenEmptyCols = FALSE)
 }
 \arguments{
-\item{DAG}{The name of the data access group for which to request data. Current DAG options include: 'paguirigana', 'aberger'.  A character vector can be supplied.}
+\item{DAG}{A character vector contining the name(s) of the data access group(s) for which to request data. Current DAG options include: 'paguirigana', 'aberger'.}
 
 \item{domain}{The domain of the data type to return.  Values include: `all`, `specimen`, `assay`, `molecular`}
 

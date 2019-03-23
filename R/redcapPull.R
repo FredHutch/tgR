@@ -2,7 +2,7 @@
 #'
 #'
 #'
-#' @param DAG The name of the data access group for which to request data. Current DAG options include: 'paguirigana', 'aberger'.  A character vector can be supplied.
+#' @param DAG A character vector contining the name(s) of the data access group(s) for which to request data. Current DAG options include: 'paguirigana', 'aberger'.
 #' @param domain The domain of the data type to return.  Values include: `all`, `specimen`, `assay`, `molecular`
 #' @param harmonizedOnly Whether you want only the data that is harmonized across all projects (TRUE) or a complete data set (FALSE).
 #' @param evenEmptyCols Whether you want even the empty columns in your final data frame (TRUE) or if you just want columns where there is at least one value in the resulting dataset (FALSE).
@@ -12,6 +12,8 @@
 #' Requires REDCap credentials to be set in the environment.
 #' @export
 redcapPull <- function(DAG = c("paguirigana", "bergera"), domain = "all", harmonizedOnly = FALSE, evenEmptyCols = FALSE) {
+  if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT"))) {
+    print("You have missing environment variables.  Please setCreds().")} else print("Credentials set successfully.")
     if (domain %in% c("all", "specimen")) {
         INData <- REDCapR::redcap_read_oneshot(
           Sys.getenv("REDURI"), Sys.getenv("INT"),

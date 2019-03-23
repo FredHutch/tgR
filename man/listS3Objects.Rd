@@ -2,15 +2,15 @@
 % Please edit documentation in R/listS3Objects.R
 \name{listS3Objects}
 \alias{listS3Objects}
-\title{Pull the list of objects and tags in S3}
+\title{Pull the list(s) of objects and tags in S3}
 \usage{
 listS3Objects(bucket)
 }
 \arguments{
-\item{bucket}{The name of the S3 bucket containing the data.}
+\item{bucket}{A character vector containing the full names of the S3 bucket(s) containing the data to return.}
 }
 \value{
-Returns a long form data frame of annotated objects in the S3 bucket.
+Returns a long form data frame of objects in the indicated S3 bucket(s).
 }
 \description{
 Pulls Information from the results of s3tagcrawler for TGR that are in an S3 bucket, including the object list and their tags as well as size metadata.
