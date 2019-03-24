@@ -18,7 +18,7 @@ Returns the list of idnetifiers that have already been used.
 Test if identifiers have already been used in the TGR.
 }
 \details{
-Requires REDCap credentials to be set in the environment.
+Requires **admin** REDCap credentials to be set in the environment.
 }
 \author{
 Amy Paguirigan

@@ -9,8 +9,8 @@
 #' @export
 
 pullAnnotations <- function() {
-    print("pulling annotations from the master branch of the tgr-annotations repo")
-    commonKnowledge <- httr::content(httr::GET("https://raw.github.com/FredHutch/tgr-annotations/master/commonKnowledge.csv"),
-        as = "parsed", type = "text/csv")
-    return(commonKnowledge)
+  print("pulling annotations from the master branch of the tgr-annotations repo")
+  commonKnowledge <- httr::content(httr::GET("https://raw.github.com/FredHutch/tgr-annotations/master/commonKnowledge.csv"),
+                                   as = "parsed", type = "text/csv")
+  return(commonKnowledge)
 }

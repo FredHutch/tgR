@@ -7,16 +7,16 @@
 listS3RepoObjects(bucket = "fh-pi-paguirigan-a-genomicsrepo")
 }
 \arguments{
-\item{bucket}{The name of the S3 bucket containing the data, or "repository" if the intention is to query the whole Repository.}
+\item{bucket}{The name of the S3 bucket containing the data.}
 }
 \value{
-Returns a long form data frame of annotated objects in the S3 bucket.
+Returns a long form data frame of annotated objects in the S3 buckets associated with the Repository.
 }
 \description{
 Pulls Information from the results of s3tagcrawler for TGR that are in an S3 bucket, including the object list and their tags as well as size metadata.
 }
 \details{
-Requires S3 credentials to be set in the environment by setCreds.
+Requires **admin** or **app** S3 credentials to be set in the environment by setCreds.
 }
 \author{
 Amy Paguirigan

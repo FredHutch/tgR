@@ -6,9 +6,12 @@
 #' @return A data frame of makeMeaning.  This is a template to add to the commonKnowledge dataframe with new definitions or corrections.
 #' @author Amy Paguirigan
 #' @details
-#' Requires REDCap credentials to be set in the environment.
+#' Requires **admin** REDCap credentials to be set in the environment.
 #' @export
 undefinedAnnotations <- function(commonKnowledge) {
+  if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
+    print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
+
   print("Get all data from REDCap for variables intended to be harmonized.")
   sciMeta <- redcapPull(harmonizedOnly = TRUE)
   sciMeta <- Filter(function(x)!all(is.na(x)), sciMeta)
@@ -44,9 +47,12 @@ undefinedAnnotations <- function(commonKnowledge) {
 #' @return Returns the list of idnetifiers that have already been used.
 #' @author Amy Paguirigan
 #' @details
-#' Requires REDCap credentials to be set in the environment.
+#' Requires **admin** REDCap credentials to be set in the environment.
 #' @export
 usedIdentifiers <- function(x, type) {
+  if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
+    print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
+
   if (type == "biospecimen_id") {
     IDs <- REDCapR::redcap_read_oneshot(
       Sys.getenv("REDURI"), Sys.getenv("INT"),
@@ -72,9 +78,12 @@ usedIdentifiers <- function(x, type) {
 #' @return Nothing.  Creates character vectors containing the `categorical` annotations, the `truefalse` annotations, the union of these `fieldList`, and all columns in `summarizeList`.
 #' @author Amy Paguirigan
 #' @details
-#' Requires REDCap credentials to be set in the environment.
+#' Requires **admin** REDCap credentials to be set in the environment.
 #' @export
 annotationDictionary <- function(commonKnowledge) {
+  if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
+    print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
+
   print("annotationDictionary(); setup for UI")
   # Get representative actual column names from REDCap by pulling one dataset
   INData <- REDCapR::redcap_read_oneshot(
@@ -101,37 +110,51 @@ annotationDictionary <- function(commonKnowledge) {
 #'
 #' Pulls Information from the results of s3tagcrawler for TGR that are in an S3 bucket, including the object list and their tags as well as size metadata.
 #'
-#' @param bucket The name of the S3 bucket containing the data, or "repository" if the intention is to query the whole Repository.
-#' @return Returns a long form data frame of annotated objects in the S3 bucket.
+#' @param bucket The name of the S3 bucket containing the data.
+#' @return Returns a long form data frame of annotated objects in the S3 buckets associated with the Repository.
 #' @author Amy Paguirigan
 #' @details
-#' Requires S3 credentials to be set in the environment by setCreds.
+#' Requires **admin** or **app** S3 credentials to be set in the environment by setCreds.
 #' @export
 listS3RepoObjects <- function(bucket = "fh-pi-paguirigan-a-genomicsrepo") {
+  if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
+    print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
+
   Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
              AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
              AWS_DEFAULT_REGION = "us-west-2")
-  a <- get_bucket_df(bucket = bucket, prefix = "apptags/")
-  a$pi_bucket <- paste0("fh-pi-", sub("^([^-]*-[^-]*).*", "\\1", gsub("^[^/]*/", "", a$Key)))
-  tagFiles <- a[grepl("s3tags", a$Key)==T,]
-  sizeFiles <- a[grepl("s3sizes", a$Key)==T,]
-
-  print("Pulling all S3 tag lists.")
-  s3tags <- aws.s3::s3read_using(utils::read.csv, stringsAsFactors = F,
-                                 object = "apptags/s3tags.csv",
-                                 bucket = bucket)
-  s3tags <- s3tags %>% dplyr::select("key", "molecular_id", "omics_sample_name", "stage", "workflowID")
-  s3tags$pi_bucket <- bucket
-  s3tags <- s3tags[s3tags$molecular_id != "" & s3tags$omics_sample_name != "" & s3tags$stage != "", ]
-  print("Pulling all S3 object size lists.")
-  s3sizes <- aws.s3::s3read_using(utils::read.table, stringsAsFactors = F,
-                                  col.names = c("dateCreated", "timeCreated", "sizeBytes", "key"),
-                                  object = "tg/apptags/s3sizes.tsv",
-                                  bucket = bucket)
-  s3sizes$pi_bucket <- bucket
-  print("Joining tags and sizes.")
-  allObjects <- dplyr::inner_join(s3tags, s3sizes)
-  return(allObjects)
+  a <- aws.s3::get_bucket_df(bucket = bucket, prefix = "apptags/meta/")
+  b <- purrr::map_dfr(a$Key, function(x) {
+    aws.s3::s3read_using(utils::read.csv, stringsAsFactors = F,
+                         object = x,
+                         bucket = bucket)
+  })
+  return(b)
 }
 
+#' Pull the summary of objects and tags in the Repository overall
+#'
+#' Pulls just the processed summary of object metadata for all buckets with data in the Repository.
+#'
+#' @param bucket The name of the S3 bucket containing the data.
+#' @return Returns a long form data frame of annotated objects in the S3 bucket.
+#' @author Amy Paguirigan
+#' @details
+#' Requires **admin** or **app** S3 credentials to be set in the environment by setCreds.
+#' @export
+listS3RepoSummaries <- function(bucket = "fh-pi-paguirigan-a-genomicsrepo") {
+  if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
+    print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
+
+  Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
+             AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
+             AWS_DEFAULT_REGION = "us-west-2")
+  c <- aws.s3::get_bucket_df(bucket = bucket, prefix = "apptags/summary/")
+  d <- purrr::map_dfr(c$Key, function(x) {
+    aws.s3::s3read_using(utils::read.csv, stringsAsFactors = F,
+                         object = x,
+                         bucket = bucket)
+  })
+  return(d)
+}
 

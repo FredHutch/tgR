@@ -16,7 +16,7 @@ Nothing.  Creates character vectors containing the `categorical` annotations, th
 Pulls sample data down from REDCap in order to generate example column lists for use in Shiny UI's.
 }
 \details{
-Requires REDCap credentials to be set in the environment.
+Requires **admin** REDCap credentials to be set in the environment.
 }
 \author{
 Amy Paguirigan

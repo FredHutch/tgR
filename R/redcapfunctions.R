@@ -1,4 +1,4 @@
-#' Queries all TGR REDCap for metadata
+#' Queries all TGR REDCap Projects for metadata
 #'
 #'
 #'
@@ -62,3 +62,4 @@ redcapPull <- function(DAG = c("paguirigana", "bergera"), domain = "all", harmon
 
     return(results)
 }
+

@@ -16,7 +16,7 @@ A data frame of makeMeaning.  This is a template to add to the commonKnowledge d
 Pulls sample data down from REDCap and compares them with the defined annotation list in GitHub and identifies variables in REDCap that need defining in GitHub.  Only variables for which there is a value in at least one record are returned.
 }
 \details{
-Requires REDCap credentials to be set in the environment.
+Requires **admin** REDCap credentials to be set in the environment.
 }
 \author{
 Amy Paguirigan
