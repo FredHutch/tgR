@@ -4,9 +4,15 @@ This package currently is wrapping a pile of functions commonly in use to intera
 
 ## Installation
 
-You can install the released version of tgR by:
+You can install the most recent version of tgR by:
 
 ```r
 require(devtools)
-devtools::install_github('FredHutch/tgR', auth_token = Sys.getenv('GITTOKEN'))
+devtools::install_github('FredHutch/tgR')
+```
+
+Install a specific release version (in this case v1.0) by:
+```r
+require(devtools)
+devtools::install_github('FredHutch/tgR@v1.0')
 ```
