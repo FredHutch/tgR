@@ -8,5 +8,5 @@ You can install the released version of tgR by:
 
 ```r
 require(devtools)
-devtools::install_github('vortexing/tgR', auth_token = Sys.getenv('GITTOKEN'))
+devtools::install_github('FredHutch/tgR', auth_token = Sys.getenv('GITTOKEN'))
 ```
