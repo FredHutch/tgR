@@ -1,12 +1,16 @@
 #' Sets tgR environment variables
 #'
-#' @param tokenSet Which token set to apply, currently either "admin" or "app".
+#' @param tokenSet Which token set to apply, default is "file", and then a path to a credentials file is required.  Other options include "admin" or "app".
+#' @param path The path to the file to source that contains appropriately defined environment variables.
 #' @return Nothing, sets environment variables for the remaining functions to work.
 #' @author Amy Paguirigan
 #' @details
-#' Requires the desired REDCap and S3 credentials to be set in the environment.
+#' Requires the desired REDCap and S3 credentials to be set in the environment or be available in an R file specified.
 #' @export
-setCreds <- function(tokenSet="admin") {
+setCreds <- function(tokenSet="file", path) {
+	if (tokenSet == "file"){
+		source(path);
+  }
   if (tokenSet == "admin"){
     Sys.setenv(INT=Sys.getenv("INTOKEN"))
     Sys.setenv(FCT=Sys.getenv("FCTOKEN"))
@@ -21,6 +25,7 @@ setCreds <- function(tokenSet="admin") {
     Sys.setenv(S3A=Sys.getenv("PAGAACCESS2"))
     Sys.setenv(S3SA=Sys.getenv("PAGASECRET2"))
   }
+  Sys.setenv(REDURI="https://cdsweb07.fhcrc.org/redcap/api/")
   if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
-    print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
+    print("You have missing environment variables.  Please set env vars.")} else print("Credentials set successfully.")
 }

@@ -4,10 +4,12 @@
 \alias{setCreds}
 \title{Sets tgR environment variables}
 \usage{
-setCreds(tokenSet = "admin")
+setCreds(tokenSet = "file", path)
 }
 \arguments{
-\item{tokenSet}{Which token set to apply, currently either "admin" or "app".}
+\item{tokenSet}{Which token set to apply, default is "file", and then a path to a credentials file is required.  Other options include "admin" or "app".}
+
+\item{path}{The path to the file to source that contains appropriately defined environment variables.}
 }
 \value{
 Nothing, sets environment variables for the remaining functions to work.
@@ -16,7 +18,7 @@ Nothing, sets environment variables for the remaining functions to work.
 Sets tgR environment variables
 }
 \details{
-Requires the desired REDCap and S3 credentials to be set in the environment.
+Requires the desired REDCap and S3 credentials to be set in the environment or be available in an R file specified.
 }
 \author{
 Amy Paguirigan
