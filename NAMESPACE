@@ -2,6 +2,10 @@
 
 export("%>%")
 export(annotationDictionary)
+export(cromwellCall)
+export(cromwellFailures)
+export(cromwellJobs)
+export(cromwellWorkflow)
 export(listS3Objects)
 export(listS3RepoObjects)
 export(listS3RepoSummaries)
