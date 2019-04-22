@@ -129,10 +129,8 @@ cromwellFailures <- function(workflow_id){
 
       }
   }
-
-  }
-
 }
+
 
 
 # ## Mongodb query for AWS Batch
