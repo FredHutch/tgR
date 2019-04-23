@@ -26,6 +26,9 @@ setCreds <- function(tokenSet="file", path) {
     Sys.setenv(S3SA=Sys.getenv("PAGASECRET2"))
   }
   Sys.setenv(REDURI="https://cdsweb07.fhcrc.org/redcap/api/")
+  Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
+             AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
+             AWS_DEFAULT_REGION = "us-west-2")
   if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
     print("You have missing environment variables.  Please set env vars.")} else print("Credentials set successfully.")
 }
