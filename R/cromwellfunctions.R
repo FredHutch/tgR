@@ -17,7 +17,7 @@ cromwellJobs <- function(days = 7){
   cromTable <- purrr::map_dfr(cromDat, dplyr::bind_rows)
   cromTable <- dplyr::rename(cromTable, "workflow_id" = "id")
   if("end" %in% colnames(cromTable)==T& "start" %in% colnames(cromTable)==T) {
-    cromTable$jobDuration <- as.numeric(difftime(cromTable$end, cromTable$start, units = "mins"))
+    cromTable$jobDuration <- as.character(difftime(cromTable$end, cromTable$start, units = "mins"))
   } else (cromTable$jobDuration <- "NA")
   return(cromTable)
 }
@@ -50,7 +50,7 @@ cromwellCall <- function(workflow_id) {
         Y$callName <- i
         Y <- mutate_all(Y, as.character)
         if("end" %in% colnames(Y)==T & "start" %in% colnames(Y)==T) {
-          Y$jobDuration <- as.numeric(difftime(Y$end, Y$start, units = "mins"))
+          Y$jobDuration <- as.character(difftime(Y$end, Y$start, units = "mins"))
         } else {Y$jobDuration <- "NA"}
         as.data.frame(Y)})
       names(simpleStan) <- names(stanley)
@@ -89,8 +89,8 @@ cromwellWorkflow <- function(workflow_id) {
     remainder <- as.data.frame(purrr::discard(crommetadata, is.list))
     remainder <- dplyr::rename(remainder, "workflow_id"="id")
     resultdf <- purrr::reduce(list(remainder, drag, submit), dplyr::full_join, by = "workflow_id")
-    if ("end" %in% colnames(resultdf) == T & "start" %in% colnames(resultdf)==T) {
-      resultdf <- dplyr::mutate(resultdf, workflowDuration = as.numeric(difftime(end, start, units = "mins")))
+    if ("end" %in% colnames(resultdf) == T & "start" %in% colnames(resultdf)==T ) {
+      resultdf <- dplyr::mutate(resultdf, workflowDuration = as.character(difftime(end, start, units = "mins")))
     } else {resultdf <- dplyr::mutate(resultdf, end = "NA" , workflowDuration = "NA")}
     }
   return(resultdf)
