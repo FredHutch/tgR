@@ -48,7 +48,7 @@ cromwellCall <- function(workflow_id) {
         Y <- purrr::map_dfc(y, cbind)
         Y$workflow_id <- workflow_id
         Y$callName <- i
-        Y <- mutate_all(Y, as.character)
+        Y <- dplyr::mutate_all(Y, as.character)
         if("end" %in% colnames(Y)==T & "start" %in% colnames(Y)==T) {
           Y$jobDuration <- as.numeric(difftime(Y$end, Y$start, units = "mins"))
         } else {Y$jobDuration <- "NA"}
@@ -126,8 +126,7 @@ cromwellFailures <- function(workflow_id){
         meltedlists <- dplyr::filter(meltedlists,is.na(failures.message) == F)} else {
           meltedlists <- meltedlists[0,]
         }
-
-      }
+     }
   }
 }
 
