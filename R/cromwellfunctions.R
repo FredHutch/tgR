@@ -15,10 +15,12 @@ cromwellJobs <- function(days = 7){
   beforeNow <- Sys.Date()-round(days,0)
   cromDat <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/query?submission=", beforeNow, "T00%3A00Z")))$results
   cromTable <- purrr::map_dfr(cromDat, dplyr::bind_rows)
+  if(nrow(cromTable)>0){
   cromTable <- dplyr::rename(cromTable, "workflow_id" = "id")
   if("end" %in% colnames(cromTable)==T& "start" %in% colnames(cromTable)==T) {
     cromTable$jobDuration <- as.character(difftime(cromTable$end, cromTable$start, units = "mins"))
   } else (cromTable$jobDuration <- "NA")
+  } else (cromTable = as.data.frame("No jobs in that time period"))
   return(cromTable)
 }
 
@@ -38,6 +40,7 @@ cromwellCall <- function(workflow_id) {
   crommetadata <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/",
                                                  workflow_id,"/metadata?expandSubWorkflows=false")))
   jobdf <- as.data.frame(c())
+  callNames <- names(crommetadata$calls)
   if(is.list(crommetadata$calls)==T){
     bob <- unlist(crommetadata$calls, recursive = FALSE, use.names = TRUE)
     if (length(bob) > 0) {
@@ -55,6 +58,7 @@ cromwellCall <- function(workflow_id) {
         as.data.frame(Y)})
       names(simpleStan) <- names(stanley)
       jobdf <- purrr::reduce(simpleStan, dplyr::bind_rows)
+      #If a callNames value is in teh string in callName, then replace that value with THAT callNames value
       jobdf$callName <- gsub("[0-9]*$", "", jobdf$callName)
     }}
   return(jobdf)
