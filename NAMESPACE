@@ -2,6 +2,7 @@
 
 export("%>%")
 export(annotationDictionary)
+export(cromwellCache)
 export(cromwellCall)
 export(cromwellFailures)
 export(cromwellJobs)

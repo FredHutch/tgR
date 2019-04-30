@@ -2,12 +2,12 @@
 % Please edit documentation in R/cromwellfunctions.R
 \name{cromwellCall}
 \alias{cromwellCall}
-\title{Pull Cromwell Calls}
+\title{Pull Cromwell Workflow Calls}
 \usage{
 cromwellCall(workflow_id)
 }
 \arguments{
-\item{workflow_id}{The workflow ID to return calls for.}
+\item{workflow_id}{The workflow ID to return call metadata on.}
 }
 \value{
 Returns a long form data frame of metadata on calls.
@@ -16,7 +16,7 @@ Returns a long form data frame of metadata on calls.
 Retrieve and process call data for a workflow
 }
 \details{
-Requires valid cromwell URL to be set in the environment.
+Requires valid Cromwell URL to be set in the environment.
 }
 \author{
 Amy Paguirigan

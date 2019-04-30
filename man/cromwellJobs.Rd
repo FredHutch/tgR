@@ -2,21 +2,21 @@
 % Please edit documentation in R/cromwellfunctions.R
 \name{cromwellJobs}
 \alias{cromwellJobs}
-\title{Pull Cromwell Jobs}
+\title{Pull Cromwell Workflow Jobs}
 \usage{
-cromwellJobs(days = 7)
+cromwellJobs(days = 1)
 }
 \arguments{
-\item{days}{The number of days of history to return.}
+\item{days}{The number of days of history to return, defaults to 1 day.}
 }
 \value{
-Returns a long form data frame of metadata on workflows.
+Returns a long form data frame of metadata on workflow jobs submitted
 }
 \description{
-Requests metadata about Cromwell Jobs
+Requests metadata about Cromwell Workflow Jobs during a time period specified.
 }
 \details{
-Requires valid cromwell URL to be set in the environment.
+Requires valid Cromwell URL to be set in the environment.
 }
 \author{
 Amy Paguirigan

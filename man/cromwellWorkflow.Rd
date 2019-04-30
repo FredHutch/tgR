@@ -10,13 +10,13 @@ cromwellWorkflow(workflow_id)
 \item{workflow_id}{The workflow ID to return metadata for.}
 }
 \value{
-Returns a long form data frame of metadata on workflows.
+Returns a long form data frame of metadata on a workflow.
 }
 \description{
 Retrieve and process all labels, submission and workflow level metadata for a workflow
 }
 \details{
-Requires valid cromwell URL to be set in the environment.
+Requires valid Cromwell URL to be set in the environment.
 }
 \author{
 Amy Paguirigan
