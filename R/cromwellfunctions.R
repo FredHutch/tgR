@@ -39,30 +39,26 @@ cromwellCall <- function(workflow_id) {
     stop("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
   crommetadata <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/",
                                                  workflow_id,"/metadata?expandSubWorkflows=false")))
-  jobdf <- as.data.frame(c())
   callNames <- names(crommetadata$calls)
   if(is.list(crommetadata$calls)==T){
-    bob <- unlist(crommetadata$calls, recursive = FALSE, use.names = TRUE)
+      bob <- purrr::pluck(crommetadata, "calls")
     if (length(bob) > 0) {
-      stanley <- purrr::map(bob, function(x) {purrr::flatten(x)})
-      simpleStan <- purrr::map(names(stanley), function(i) {
-        x <- stanley[[i]]
-        y <- purrr::discard(x, is.list)
-        Y <- purrr::map_dfc(y, cbind)
-        Y$workflow_id <- workflow_id
-        Y$callName <- i
-        Y <- dplyr::mutate_all(Y, as.character)
-        if("end" %in% colnames(Y)==T & "start" %in% colnames(Y)==T) {
-          Y$jobDuration <- as.character(difftime(Y$end, Y$start, units = "mins"))
-        } else {Y$jobDuration <- "NA"}
-        as.data.frame(Y)})
-      names(simpleStan) <- names(stanley)
-      jobdf <- purrr::reduce(simpleStan, dplyr::bind_rows)
-      #If a callNames value is in the string in callName, then replace that value with THAT callNames value
-      jobdf$callName <- gsub("[0-9]*$", "", jobdf$callName)
-    }
-    } else(jobdf = as.data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)))
-  return(jobdf)
+      justCalls <- purrr::map(bob, function(callData) {
+        purrr::map_dfr(callData, function(shardData){
+          y <- purrr::discard(shardData, is.list)
+          Z <- as.data.frame(rbind(unlist(y)))
+        })
+      }) %>% purrr::map_dfr(., function(x){x}, .id = "callName")
+      justCalls$workflow_id <- workflow_id
+      if("end" %in% colnames(justCalls)==T & "start" %in% colnames(justCalls)==T) {
+          justCalls$jobDuration <- as.character(difftime(justCalls$end, justCalls$start, units = "mins"))
+      } else {justCalls$jobDuration <- "NA"}
+      justCalls <- justCalls %>% dplyr::select(one_of("workflow_id","callName","shardIndex", "jobId","attempt", "start","end",
+                             "executionStatus", "returnCode", "stdout", "compressedDockerSize", "backend", "stderr",
+                             "callRoot", "backendStatus", "commandLine", "dockerImageUsed", "retryableFailure", "jobDuration"))
+    } else(justCalls = as.data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)))
+  }
+  return(justCalls)
 }
 
 #' Pull Cromwell Workflow Metadata
@@ -195,7 +191,30 @@ cromwellCache <- function(workflow_id){
     } else(geocache = as.data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)))
   return(geocache)
   }
-
+#' Submit a Workflow to Cromwell
+#'
+#' Gets info about call caching status for the calls of a workflow
+#'
+#' @param workflow_id The workflow ID to return call caching metadata for.
+#' @return Returns a long form data frame of metadata on call caching in a workflow.
+#' @author Amy Paguirigan
+#' @details
+#' Requires valid Cromwell URL to be set in the environment.
+#' @export
+#
+cromwellSubmitBatch <- function(WDL, Params, Batch, Options, Labels, Dependencies){
+  require(httr); require(jsonlite)
+  cromDat <- httr::POST(url = paste0(cromwellURL,"/api/workflows/v1"),
+                        body = list(wdlSource = upload_file(WDL),
+                                    workflowInputs = upload_file(Params),
+                                    workflowInputs_2 = upload_file(Batch),
+                                    labels = toJSON(as.list(Labels), auto_unbox = TRUE),
+                                    workflowOptions = upload_file(Options),
+                                    workflowDependencies = Dependencies),
+                        encode = "multipart")
+  cromResponse <- as.data.frame(httr::content(cromDat))
+  return(cromResponse)
+}
 
 
 
