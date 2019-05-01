@@ -10,7 +10,7 @@
 #' @export
 cromwellJobs <- function(days = 1){
   if ("" %in% Sys.getenv("CROMWELLURL")) {
-    print("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
+    stop("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
   print("cromwellJobs(); Querying cromwell for jobs list.")
   beforeNow <- Sys.Date()-round(days,0)
   cromDat <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/query?submission=", beforeNow, "T00%3A00Z")))$results
@@ -36,7 +36,7 @@ cromwellJobs <- function(days = 1){
 #' @export
 cromwellCall <- function(workflow_id) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
-    print("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
+    stop("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
   crommetadata <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/",
                                                  workflow_id,"/metadata?expandSubWorkflows=false")))
   jobdf <- as.data.frame(c())
@@ -77,7 +77,7 @@ cromwellCall <- function(workflow_id) {
 #' @export
 cromwellWorkflow <- function(workflow_id) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
-    print("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
+    stop("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
   crommetadata <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/",
                                                  workflow_id,"/metadata?expandSubWorkflows=false")))
   resultdf <- as.data.frame(c())
@@ -113,7 +113,7 @@ cromwellWorkflow <- function(workflow_id) {
 #
 cromwellFailures <- function(workflow_id){
   if ("" %in% Sys.getenv("CROMWELLURL")) {
-    print("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
+    stop("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
   cromfail <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/",
                                              workflow_id,"/metadata?includeKey=failures&includeKey=jobId")))
   faildf <- as.data.frame(c())
@@ -171,9 +171,11 @@ cromwellCache <- function(workflow_id){
     cacheHits <- purrr::map_dfr(bobCallMeta, function(x){
       x %>% dplyr::filter(callCaching.hit == T) %>% Filter(function(x)!all(is.na(x)), .)
     }, .id = "callName")
+    cacheHits$workflow_id <- workflow_id
     cacheMisses <- purrr::map_dfr(bobCallMeta, function(x){
       x %>% dplyr::filter(callCaching.hit == F) %>% Filter(function(x)!all(is.na(x)), .)
     }, .id = "callName")
+    cacheMisses$workflow_id <- workflow_id
 
     hitFailures <- purrr::map(bobCalls, function(eachCall){
       listofShardFrames <- purrr::map_dfr(eachCall, function(eachShard){
@@ -188,7 +190,7 @@ cromwellCache <- function(workflow_id){
       })
     }) %>% purrr::map_dfr(., function(x){ x }, .id = "callName") #WTF?? Why does this work but reduce or flatten don't?
 
-    cacheMisses <- dplyr::full_join(cacheMisses, cacheHitFailures, by = c("callName", "shardIndex"))
+    cacheMisses <- dplyr::full_join(cacheMisses, hitFailures, by = c("callName", "shardIndex"))
     geocache <- dplyr::bind_rows(cacheHits, cacheMisses)
     } else(geocache = as.data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)))
   return(geocache)
