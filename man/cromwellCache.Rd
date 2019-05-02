@@ -18,6 +18,15 @@ Gets info about call caching status for the calls of a workflow
 \details{
 Requires valid Cromwell URL to be set in the environment.
 }
+\examples{
+## Set credentials from a file with the specified format, called `secrets.R` in path `~/myCreds/`.
+setCreds(tokenSet = "file", path = "~/R/requiredCredentials.R")
+## Request what jobs have been submitted to your Cromwell instance in the past 7 days.
+recentJobs <- cromwellJobs(days = 7)
+## Request workflow metadata for a specific job that was run in your Cromwell instance.
+thisWorkflowID <- recentJobs$workflow_id[1]
+cacheMeta <- cromwellCache(workflow_id = thisWorkflowID)
+}
 \author{
 Amy Paguirigan
 }

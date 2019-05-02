@@ -2,7 +2,7 @@
 % Please edit documentation in R/cromwellfunctions.R
 \name{cromwellJobs}
 \alias{cromwellJobs}
-\title{Pull Cromwell Workflow Jobs}
+\title{Pull metadata for recent Cromwell workflow jobs}
 \usage{
 cromwellJobs(days = 1)
 }
@@ -10,13 +10,20 @@ cromwellJobs(days = 1)
 \item{days}{The number of days of history to return, defaults to 1 day.}
 }
 \value{
-Returns a long form data frame of metadata on workflow jobs submitted
+Returns a long form data frame of metadata on workflow jobs submitted to a specific Cromwell instance.
 }
 \description{
-Requests metadata about Cromwell Workflow Jobs during a time period specified.
+Requests metadata about Cromwell workflow jobs during a time period specified.
 }
 \details{
 Requires valid Cromwell URL to be set in the environment.
+}
+\examples{
+## Set credentials from a file with the specified format, called `secrets.R` in path `~/myCreds/`.
+setCreds(tokenSet = "file", path = "~/myCreds/secrets.R")
+## Request what jobs have been submitted to your Cromwell instance in the past 7 days.
+recentJobs <- cromwellJobs(days = 7)
+
 }
 \author{
 Amy Paguirigan

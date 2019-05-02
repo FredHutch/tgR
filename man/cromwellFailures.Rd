@@ -2,7 +2,7 @@
 % Please edit documentation in R/cromwellfunctions.R
 \name{cromwellFailures}
 \alias{cromwellFailures}
-\title{Pull Cromwell Call Failure Data}
+\title{Pull metadata for the failed calls made in a Cromwell workflow job}
 \usage{
 cromwellFailures(workflow_id)
 }
@@ -13,10 +13,19 @@ cromwellFailures(workflow_id)
 Returns a long form data frame of metadata on failed calls in a workflow.
 }
 \description{
-Gets info about failed jobs for a workflow
+Gets info about failed calls for a specific workflow
 }
 \details{
-Requires valid cromwell URL to be set in the environment.
+Requires valid Cromwell URL to be set in the environment.
+}
+\examples{
+## Set credentials from a file with the specified format, called `secrets.R` in path `~/myCreds/`.
+setCreds(tokenSet = "file", path = "~/myCreds/secrets.R")
+## Request what jobs have been submitted to your Cromwell instance in the past 7 days.
+recentJobs <- cromwellJobs(days = 7)
+## Request workflow metadata for a specific job that was run in your Cromwell instance.
+thisWorkflowID <- recentJobs$workflow_id[1]
+failsMeta <- cromwellFailures(workflow_id = thisWorkflowID)
 }
 \author{
 Amy Paguirigan

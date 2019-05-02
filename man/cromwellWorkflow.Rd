@@ -2,7 +2,7 @@
 % Please edit documentation in R/cromwellfunctions.R
 \name{cromwellWorkflow}
 \alias{cromwellWorkflow}
-\title{Pull Cromwell Workflow Metadata}
+\title{Pull metadata for a specific Cromwell workflow job}
 \usage{
 cromwellWorkflow(workflow_id)
 }
@@ -13,10 +13,19 @@ cromwellWorkflow(workflow_id)
 Returns a long form data frame of metadata on a workflow.
 }
 \description{
-Retrieve and process all labels, submission and workflow level metadata for a workflow
+Retrieve and process all labels, submission and workflow level metadata for a specific workflow.
 }
 \details{
 Requires valid Cromwell URL to be set in the environment.
+}
+\examples{
+## Set credentials from a file with the specified format, called `secrets.R` in path `~/myCreds/`.
+setCreds(tokenSet = "file", path = "~/myCreds/secrets.R")
+## Request what jobs have been submitted to your Cromwell instance in the past 7 days.
+recentJobs <- cromwellJobs(days = 7)
+## Request workflow metadata for a specific job that was run in your Cromwell instance.
+thisWorkflowID <- recentJobs$workflow_id[1]
+workflowMeta <- cromwellWorkflow(workflow_id = thisWorkflowID)
 }
 \author{
 Amy Paguirigan

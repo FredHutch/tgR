@@ -1,135 +1,243 @@
-#' Pull Cromwell Workflow Jobs
+#' Pull metadata for recent Cromwell workflow jobs
 #'
-#' Requests metadata about Cromwell Workflow Jobs during a time period specified.
+#' Requests metadata about Cromwell workflow jobs during a time period specified.
 #'
 #' @param days The number of days of history to return, defaults to 1 day.
-#' @return Returns a long form data frame of metadata on workflow jobs submitted
+#' @return Returns a long form data frame of metadata on workflow jobs submitted to a specific Cromwell instance.
 #' @author Amy Paguirigan
 #' @details
 #' Requires valid Cromwell URL to be set in the environment.
-#' @export
-cromwellJobs <- function(days = 1){
+#' @examples
+#' ## Set credentials from a file with the specified format, called `secrets.R` in path `~/myCreds/`.
+#' setCreds(tokenSet = "file", path = "~/myCreds/secrets.R")
+#' ## Request what jobs have been submitted to your Cromwell instance in the past 7 days.
+#' recentJobs <- cromwellJobs(days = 7)
+#'
+cromwellJobs <- function(days = 1) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
-    stop("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
+    stop("The cromwell URL is not set.  Please setCromwellURL().")
+  } else print("Cromwell URL set successfully.")
+
   print("cromwellJobs(); Querying cromwell for jobs list.")
-  beforeNow <- Sys.Date()-round(days,0)
-  cromDat <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/query?submission=", beforeNow, "T00%3A00Z")))$results
+
+  beforeNow <- Sys.Date() - round(days, 0)
+  cromDat <-
+    httr::content(httr::GET(
+      paste0(
+        Sys.getenv("CROMWELLURL"),
+        "/api/workflows/v1/query?submission=",
+        beforeNow,
+        "T00%3A00Z"
+      )
+    ))$results
   cromTable <- purrr::map_dfr(cromDat, dplyr::bind_rows)
-  if(nrow(cromTable)>0){
-  cromTable <- dplyr::rename(cromTable, "workflow_id" = "id")
-  if("end" %in% colnames(cromTable)==T& "start" %in% colnames(cromTable)==T) {
-    cromTable$jobDuration <- as.character(difftime(cromTable$end, cromTable$start, units = "mins"))
-  } else (cromTable$jobDuration <- "NA")
-  } else (cromTable = as.data.frame("No jobs in that time period"))
+  if (nrow(cromTable) > 0) {
+    cromTable <- dplyr::rename(cromTable, "workflow_id" = "id")
+    if ("end" %in% colnames(cromTable) == T &
+        "start" %in% colnames(cromTable) == T) {
+      cromTable$jobDuration <-
+        as.character(difftime(cromTable$end, cromTable$start, units = "mins"))
+    } else {cromTable$jobDuration <- "NA"}
   return(cromTable)
+  } else {print("No jobs in that time period")}
 }
-
-#' Pull Cromwell Workflow Calls
+#' Pull metadata for a specific Cromwell workflow job
 #'
-#' Retrieve and process call data for a workflow
-#'
-#' @param workflow_id The workflow ID to return call metadata on.
-#' @return Returns a long form data frame of metadata on calls.
-#' @author Amy Paguirigan
-#' @details
-#' Requires valid Cromwell URL to be set in the environment.
-#' @export
-cromwellCall <- function(workflow_id) {
-  if ("" %in% Sys.getenv("CROMWELLURL")) {
-    stop("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
-  crommetadata <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/",
-                                                 workflow_id,"/metadata?expandSubWorkflows=false")))
-  callNames <- names(crommetadata$calls)
-  if(is.list(crommetadata$calls)==T){
-      bob <- purrr::pluck(crommetadata, "calls")
-    if (length(bob) > 0) {
-      justCalls <- purrr::map(bob, function(callData) {
-        purrr::map_dfr(callData, function(shardData){
-          y <- purrr::discard(shardData, is.list)
-          Z <- as.data.frame(rbind(unlist(y)))
-        })
-      }) %>% purrr::map_dfr(., function(x){x}, .id = "callName")
-      justCalls$workflow_id <- workflow_id
-      if("end" %in% colnames(justCalls)==T & "start" %in% colnames(justCalls)==T) {
-          justCalls$jobDuration <- as.character(difftime(justCalls$end, justCalls$start, units = "mins"))
-      } else {justCalls$jobDuration <- "NA"}
-      justCalls <- justCalls %>% dplyr::select(one_of("workflow_id","callName","shardIndex", "jobId","attempt", "start","end",
-                             "executionStatus", "returnCode", "stdout", "compressedDockerSize", "backend", "stderr",
-                             "callRoot", "backendStatus", "commandLine", "dockerImageUsed", "retryableFailure", "jobDuration"))
-    } else(justCalls = as.data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)))
-  }
-  return(justCalls)
-}
-
-#' Pull Cromwell Workflow Metadata
-#'
-#' Retrieve and process all labels, submission and workflow level metadata for a workflow
+#' Retrieve and process all labels, submission and workflow level metadata for a specific workflow.
 #'
 #' @param workflow_id The workflow ID to return metadata for.
 #' @return Returns a long form data frame of metadata on a workflow.
 #' @author Amy Paguirigan
 #' @details
 #' Requires valid Cromwell URL to be set in the environment.
-#' @export
+#' @examples
+#' ## Set credentials from a file with the specified format, called `secrets.R` in path `~/myCreds/`.
+#' setCreds(tokenSet = "file", path = "~/myCreds/secrets.R")
+#' ## Request what jobs have been submitted to your Cromwell instance in the past 7 days.
+#' recentJobs <- cromwellJobs(days = 7)
+#' ## Request workflow metadata for a specific job that was run in your Cromwell instance.
+#' thisWorkflowID <- recentJobs$workflow_id[1]
+#' workflowMeta <- cromwellWorkflow(workflow_id = thisWorkflowID)
 cromwellWorkflow <- function(workflow_id) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
-    stop("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
-  crommetadata <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/",
-                                                 workflow_id,"/metadata?expandSubWorkflows=false")))
-  resultdf <- as.data.frame(c())
-  #Get Labels
-  if(is.list(crommetadata$labels)==T){
-    drag <- as.data.frame(purrr::flatten(crommetadata$labels), stringsAsFactors = F)
-    drag$workflow_id <- gsub("cromwell-", "", drag$cromwell.workflow.id)
-    drag$cromwell.workflow.id <- NULL
-    #Get submission data
-    submit <- as.data.frame(purrr::flatten(crommetadata$submittedFiles))
-    submit$labels <- NULL
-    submit$workflow_id <- workflow_id
-    #Get workflow level data
-    remainder <- as.data.frame(purrr::discard(crommetadata, is.list))
-    remainder <- dplyr::rename(remainder, "workflow_id"="id")
-    resultdf <- purrr::reduce(list(remainder, drag, submit), dplyr::full_join, by = "workflow_id")
-    if ("end" %in% colnames(resultdf) == T & "start" %in% colnames(resultdf)==T ) {
-      resultdf <- dplyr::mutate(resultdf, workflowDuration = as.character(difftime(end, start, units = "mins")))
-    } else {resultdf <- dplyr::mutate(resultdf, end = "NA" , workflowDuration = "NA")}
-    } else(resultdf = as.data.frame(paste0("There are no available metadata associated with the workflow_id: ", workflow_id)))
-  return(resultdf)
-}
-#' Pull Cromwell Call Failure Data
+    stop("The cromwell URL is not set.  Please setCromwellURL().")
+  } else print("Cromwell URL set successfully.")
+
+  crommetadata <-
+    httr::content(httr::GET(
+      paste0(
+        Sys.getenv("CROMWELLURL"),
+        "/api/workflows/v1/",
+        workflow_id,
+        "/metadata?expandSubWorkflows=false"
+      )))
+  if (crommetadata$status == "fail") {
+    stop(crommetadata$message)
+  } else {
+      if ("id" %in% names(crommetadata)) {
+        #Get Labels
+        if (is.list(crommetadata$labels) == T) {
+          drag <- purrr::pluck(crommetadata, "labels")
+          drag <-
+            as.data.frame(purrr::flatten(drag), stringsAsFactors = F)
+          drag$workflow_id <-
+            gsub("cromwell-", "", drag$cromwell.workflow.id)
+          drag$cromwell.workflow.id <- NULL
+        } else {
+          drag <- setNames(data.frame(workflow_id), c("workflow_id"))
+        }
+        #Get submission data
+        submit <- as.data.frame(purrr::flatten(purrr::pluck(crommetadata, "submittedFiles")))
+        submit$labels <- NULL
+        submit$workflow_id <- workflow_id
+        #Get remaining workflow level data
+        remainder <- as.data.frame(purrr::discard(crommetadata, is.list))
+        remainder <- dplyr::rename(remainder, "workflow_id" = "id")
+        suppressWarnings(resultdf <- purrr::reduce(list(remainder, drag, submit), dplyr::full_join, by = "workflow_id")) # fix this warning suppression later
+        if ("end" %in% colnames(resultdf) == T &
+            "start" %in% colnames(resultdf) == T) {
+          resultdf <- dplyr::mutate(resultdf, workflowDuration = as.character(difftime(end, start, units = "mins")))
+        } else {
+          resultdf <- dplyr::mutate(resultdf,
+                          end = "NA" ,
+                          workflowDuration = "NA")
+        }
+      } else
+        {resultdf = data.frame(paste0(
+            "There are no available metadata associated with the workflow_id: ",
+            workflow_id))}
+    }
+    return(resultdf)
+  }
+
+#' Pull metadata for the calls made in a Cromwell workflow job
 #'
-#' Gets info about failed jobs for a workflow
+#' Retrieve and process call metadata for a specific workflow.
+#'
+#' @param workflow_id The workflow ID to return call metadata on.
+#' @return Returns a long form data frame of metadata on calls.
+#' @author Amy Paguirigan
+#' @details
+#' Requires valid Cromwell URL to be set in the environment.
+#' @examples
+#' ## Set credentials from a file with the specified format, called `secrets.R` in path `~/myCreds/`.
+#' setCreds(tokenSet = "file", path = "~/myCreds/secrets.R")
+#' ## Request what jobs have been submitted to your Cromwell instance in the past 7 days.
+#' recentJobs <- cromwellJobs(days = 7)
+#' ## Request workflow metadata for a specific job that was run in your Cromwell instance.
+#' thisWorkflowID <- recentJobs$workflow_id[1]
+#' callsMeta <- cromwellCall(workflow_id = thisWorkflowID)
+cromwellCall <- function(workflow_id) {
+  if ("" %in% Sys.getenv("CROMWELLURL")) {
+    stop("The cromwell URL is not set.  Please setCromwellURL().")
+  } else print("Cromwell URL set successfully.")
+  crommetadata <-
+    httr::content(httr::GET(
+      paste0(
+        Sys.getenv("CROMWELLURL"),
+        "/api/workflows/v1/",
+        workflow_id,
+        "/metadata?expandSubWorkflows=false"
+      )))
+  callNames <- names(crommetadata$calls)
+  if (is.list(crommetadata$calls) == T) {
+    bob <- purrr::pluck(crommetadata, "calls")
+    if (length(bob) > 0) {
+      # this is redudant but a better error catch isn't quite clear yet.
+      suppressWarnings(
+        justCalls <- purrr::map(bob, function(callData) {
+          purrr::map_dfr(callData, function(shardData) {
+            y <- purrr::discard(shardData, is.list)
+            Z <- as.data.frame(rbind(unlist(y)))
+          })
+        }) %>% purrr::map_dfr(., function(x) {x}, .id = "callName")
+      ) # Fix the warnings later.
+      justCalls$workflow_id <- workflow_id
+      if ("end" %in% colnames(justCalls) == T &
+          "start" %in% colnames(justCalls) == T) {
+        justCalls$jobDuration <-
+          as.character(difftime(justCalls$end, justCalls$start, units = "mins"))
+      } else {justCalls$jobDuration <- "NA"
+      }
+      justCalls <-
+        justCalls %>% dplyr::select(
+          one_of(
+            "workflow_id",
+            "callName",
+            "shardIndex",
+            "jobId",
+            "attempt",
+            "start",
+            "end",
+            "executionStatus",
+            "returnCode",
+            "stdout",
+            "compressedDockerSize",
+            "backend",
+            "stderr",
+            "callRoot",
+            "backendStatus",
+            "commandLine",
+            "dockerImageUsed",
+            "retryableFailure",
+            "jobDuration"
+          ))
+    } else
+      {justCalls = data.frame(paste0(
+        "There are no calls associated with the workflow_id: ",workflow_id))}
+  }
+  return(justCalls)
+}
+
+#' Pull metadata for the failed calls made in a Cromwell workflow job
+#'
+#' Gets info about failed calls for a specific workflow
 #'
 #' @param workflow_id The workflow ID to return call failure metadata for.
 #' @return Returns a long form data frame of metadata on failed calls in a workflow.
 #' @author Amy Paguirigan
 #' @details
-#' Requires valid cromwell URL to be set in the environment.
-#' @export
-#
-cromwellFailures <- function(workflow_id){
+#' Requires valid Cromwell URL to be set in the environment.
+#' @examples
+#' ## Set credentials from a file with the specified format, called `secrets.R` in path `~/myCreds/`.
+#' setCreds(tokenSet = "file", path = "~/myCreds/secrets.R")
+#' ## Request what jobs have been submitted to your Cromwell instance in the past 7 days.
+#' recentJobs <- cromwellJobs(days = 7)
+#' ## Request workflow metadata for a specific job that was run in your Cromwell instance.
+#' thisWorkflowID <- recentJobs$workflow_id[1]
+#' failsMeta <- cromwellFailures(workflow_id = thisWorkflowID)
+cromwellFailures <- function(workflow_id) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
-    stop("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
-  cromfail <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/",
-                                             workflow_id,"/metadata?includeKey=failures&includeKey=jobId")))
-  faildf <- as.data.frame(c())
-
-  if(is.list(cromfail$calls)==T){
-    callNames <- names(cromfail$calls)
+    stop("The cromwell URL is not set.  Please setCromwellURL().")
+  } else print("Cromwell URL set successfully.")
+  cromfail <-
+    httr::content(httr::GET(
+      paste0(
+        Sys.getenv("CROMWELLURL"),
+        "/api/workflows/v1/",
+        workflow_id,
+        "/metadata?includeKey=failures&includeKey=jobId"
+      )))
+  if (is.list(cromfail$calls) == T) {
     bobfail <- purrr::pluck(cromfail, "calls")
     if (length(bobfail) > 0) {
-      faildf <- purrr::map(bobfail, function(callData) {
-        purrr::map_dfr(callData, function(shardData){
-          Z <- as.data.frame(rbind(unlist(shardData)))
-        })
-      }) %>% purrr::map_dfr(., function(x){x}, .id = "callName")
+      suppressWarnings(
+        faildf <- purrr::map(bobfail, function(callData) {
+          purrr::map_dfr(callData, function(shardData) {
+            Z <- as.data.frame(rbind(unlist(shardData)))
+          })
+        }) %>% purrr::map_dfr(., function(x) {x}, .id = "callName")
+      ) # Fix the warnings later.
       faildf$workflow_id <- workflow_id
       if ("failures.message" %in% colnames(faildf)) {
-        faildf <- dplyr::filter(faildf,is.na(failures.message) == F)} else {
-          faildf <- faildf[0,]
-        }
+        faildf <- dplyr::filter(faildf, is.na(failures.message) == F)
+      } else {faildf <- faildf[0, ]}
     }
-  } else(faildf = as.data.frame(paste0("There are no failure metadata associated with the workflow_id: ", workflow_id)))
+  } else
+    faildf = data.frame(paste0(
+      "There are no failure metadata associated with the workflow_id: ",
+      workflow_id
+    ))
   return(faildf)
 }
 
@@ -142,17 +250,23 @@ cromwellFailures <- function(workflow_id){
 #' @author Amy Paguirigan
 #' @details
 #' Requires valid Cromwell URL to be set in the environment.
-#' @export
-#
+#' @examples
+#' ## Set credentials from a file with the specified format, called `secrets.R` in path `~/myCreds/`.
+#' setCreds(tokenSet = "file", path = "~/R/requiredCredentials.R")
+#' ## Request what jobs have been submitted to your Cromwell instance in the past 7 days.
+#' recentJobs <- cromwellJobs(days = 7)
+#' ## Request workflow metadata for a specific job that was run in your Cromwell instance.
+#' thisWorkflowID <- recentJobs$workflow_id[1]
+#' cacheMeta <- cromwellCache(workflow_id = thisWorkflowID)
 cromwellCache <- function(workflow_id){
   if ("" %in% Sys.getenv("CROMWELLURL")) {
     print("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
   crommetadata <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/",
                                                  workflow_id,"/metadata?expandSubWorkflows=false")), as = "parsed")
-  geocache <- as.data.frame(c())
+
   if(is.list(crommetadata$calls)==T){ # if there are calls to be queried, continue
     bobCalls <- purrr::pluck(crommetadata, "calls") # we only want the calls data from the metadata for this workflow
-    bobCallMeta <- purrr::map(bobCalls, function(x){ # for each of the calls in the workflow...
+    suppressWarnings(bobCallMeta <- purrr::map(bobCalls, function(x){ # for each of the calls in the workflow...
       purrr::map_dfr(x , function(y){ # and for each of the shards in that workflow...
         a <- purrr::keep(y, names(y) %in% c("callCaching", "inputs", "outputs")) # select only these lists
         b <- as.data.frame(rbind(unlist(a))) # flatten them and make them a data frame
@@ -163,17 +277,17 @@ cromwellCache <- function(workflow_id){
         b<- b %>% dplyr::select(-dplyr::starts_with("callCaching.hitFailures")) # then remove any data from the messy hitFailures lists
         return(b)
       })
-    })
-    cacheHits <- purrr::map_dfr(bobCallMeta, function(x){
+    })) # Fix suppression later
+    suppressWarnings(cacheHits <- purrr::map_dfr(bobCallMeta, function(x){
       x %>% dplyr::filter(callCaching.hit == T) %>% Filter(function(x)!all(is.na(x)), .)
-    }, .id = "callName")
+    }, .id = "callName")) # Fix suppression later
     cacheHits$workflow_id <- workflow_id
-    cacheMisses <- purrr::map_dfr(bobCallMeta, function(x){
+    suppressWarnings(cacheMisses <- purrr::map_dfr(bobCallMeta, function(x){
       x %>% dplyr::filter(callCaching.hit == F) %>% Filter(function(x)!all(is.na(x)), .)
-    }, .id = "callName")
+    }, .id = "callName"))  # Fix suppression later
     cacheMisses$workflow_id <- workflow_id
 
-    hitFailures <- purrr::map(bobCalls, function(eachCall){
+    suppressWarnings(hitFailures <- purrr::map(bobCalls, function(eachCall){
       listofShardFrames <- purrr::map_dfr(eachCall, function(eachShard){
         c <- purrr::pluck(eachShard, "callCaching")
         d <- as.data.frame(unlist(purrr::pluck(c, "hitFailures")))
@@ -184,35 +298,39 @@ cromwellCache <- function(workflow_id){
           return(d)
         }
       })
-    }) %>% purrr::map_dfr(., function(x){ x }, .id = "callName") #WTF?? Why does this work but reduce or flatten don't?
+    }) %>% purrr::map_dfr(., function(x){ x }, .id = "callName")) #WTF?? Why does this work but reduce or flatten don't? # Fix suppression later
 
     cacheMisses <- dplyr::full_join(cacheMisses, hitFailures, by = c("callName", "shardIndex"))
     geocache <- dplyr::bind_rows(cacheHits, cacheMisses)
-    } else(geocache = as.data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)))
+    } else(geocache = data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)))
   return(geocache)
   }
-#' Submit a Workflow to Cromwell
+#' Submit a workflow job to Cromwell
 #'
-#' Gets info about call caching status for the calls of a workflow
+#' Supports the submission of a fully defined workflow job to a Cromwell instance.
 #'
-#' @param workflow_id The workflow ID to return call caching metadata for.
-#' @return Returns a long form data frame of metadata on call caching in a workflow.
+#' @param WDL Local path to the wdl file describing the workflow.
+#' @param Params Local path to the json containing the parameters to use with the workflow.
+#' @param Batch Local path to the json containing a reference to any batch file desired if the workflow is a batch.
+#' @param Options Local path to the json containing workflow options to apply.
+#' @param Labels A data frame containing the labels for this workflow.
+#' @return Returns the response from the API post which includes the workflow ID that you'll need to monitor the job.
 #' @author Amy Paguirigan
 #' @details
 #' Requires valid Cromwell URL to be set in the environment.
-#' @export
-#
-cromwellSubmitBatch <- function(WDL, Params, Batch, Options, Labels, Dependencies){
-  require(httr); require(jsonlite)
+#' @examples
+#' TBD
+cromwellSubmitBatch <- function(WDL, Params, Batch, Options, Labels){
+  if ("" %in% Sys.getenv("CROMWELLURL")) {
+    print("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
   cromDat <- httr::POST(url = paste0(cromwellURL,"/api/workflows/v1"),
                         body = list(wdlSource = upload_file(WDL),
                                     workflowInputs = upload_file(Params),
                                     workflowInputs_2 = upload_file(Batch),
                                     labels = toJSON(as.list(Labels), auto_unbox = TRUE),
                                     workflowOptions = upload_file(Options),
-                                    workflowDependencies = Dependencies),
-                        encode = "multipart")
-  cromResponse <- as.data.frame(httr::content(cromDat))
+                        encode = "multipart"))
+  cromResponse <- data.frame(httr::content(cromDat))
   return(cromResponse)
 }
 
