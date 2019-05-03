@@ -31,13 +31,15 @@ cromwellJobs <- function(days = 1) {
       )
     ))$results
   cromTable <- purrr::map_dfr(cromDat, dplyr::bind_rows)
-  if (nrow(cromTable) > 0) {
-    cromTable <- dplyr::rename(cromTable, "workflow_id" = "id")
-    if ("end" %in% colnames(cromTable) == T &
-        "start" %in% colnames(cromTable) == T) {
-      cromTable$jobDuration <-
-        as.character(difftime(cromTable$end, cromTable$start, units = "mins"))
-    } else {cromTable$jobDuration <- "NA"}
+  if(nrow(cromTable)>0){
+  cromTable <- dplyr::rename(cromTable, "workflow_id" = "id")
+  if("end" %in% colnames(cromTable)==T& "start" %in% colnames(cromTable)==T) {
+    cromTable$start <- as.POSIXlt(cromTable$start, "UTC", "%Y-%m-%dT%H:%M:%S")
+    cromTable$end <- as.POSIXlt(cromTable$end, "UTC", "%Y-%m-%dT%H:%M:%S")
+    cromTable$submission <- as.POSIXlt(cromTable$submission, "UTC", "%Y-%m-%dT%H:%M:%S")
+    cromTable$jobDuration <- round(difftime(cromTable$end, cromTable$start, units = "mins"), 3)
+  } else (cromTable$jobDuration <- "NA")
+  } else (cromTable = as.data.frame("No jobs in that time period"))
   return(cromTable)
   } else {print("No jobs in that time period")}
 }
@@ -153,38 +155,15 @@ cromwellCall <- function(workflow_id) {
         }) %>% purrr::map_dfr(., function(x) {x}, .id = "callName")
       ) # Fix the warnings later.
       justCalls$workflow_id <- workflow_id
-      if ("end" %in% colnames(justCalls) == T &
-          "start" %in% colnames(justCalls) == T) {
-        justCalls$jobDuration <-
-          as.character(difftime(justCalls$end, justCalls$start, units = "mins"))
-      } else {justCalls$jobDuration <- "NA"
-      }
-      justCalls <-
-        justCalls %>% dplyr::select(
-          one_of(
-            "workflow_id",
-            "callName",
-            "shardIndex",
-            "jobId",
-            "attempt",
-            "start",
-            "end",
-            "executionStatus",
-            "returnCode",
-            "stdout",
-            "compressedDockerSize",
-            "backend",
-            "stderr",
-            "callRoot",
-            "backendStatus",
-            "commandLine",
-            "dockerImageUsed",
-            "retryableFailure",
-            "jobDuration"
-          ))
-    } else
-      {justCalls = data.frame(paste0(
-        "There are no calls associated with the workflow_id: ",workflow_id))}
+      if("end" %in% colnames(justCalls)==T & "start" %in% colnames(justCalls)==T) {
+        justCalls$start <- as.POSIXlt(justCalls$start, "UTC", "%Y-%m-%dT%H:%M:%S")
+        justCalls$end <- as.POSIXlt(justCalls$end, "UTC", "%Y-%m-%dT%H:%M:%S")
+        justCalls$jobDuration <- round(difftime(justCalls$end, justCalls$start, units = "mins"), 3)
+      } else {justCalls$jobDuration <- "NA"}
+      justCalls <- justCalls %>% dplyr::select(one_of("workflow_id","callName","shardIndex", "jobId","attempt", "start","end",
+                             "executionStatus", "returnCode", "stdout", "compressedDockerSize", "backend", "stderr",
+                             "callRoot", "backendStatus", "commandLine", "dockerImageUsed", "retryableFailure", "jobDuration"))
+    } else(justCalls = as.data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)))
   }
   return(justCalls)
 }
