@@ -100,6 +100,7 @@ cromwellWorkflow <- function(workflow_id) {
             "start" %in% colnames(resultdf) == T) {
           resultdf$start <- as.POSIXct(resultdf$start, "UTC", "%Y-%m-%dT%H:%M:%S")
           resultdf$end <- as.POSIXct(resultdf$end, "UTC", "%Y-%m-%dT%H:%M:%S")
+          resultdf$submission <- as.character(as.POSIXct(resultdf$submission, "UTC", "%Y-%m-%dT%H:%M:%S"))
           resultdf <- dplyr::mutate(resultdf, workflowDuration = round(difftime(end, start, units = "mins"), 3))
         } else {
           resultdf <- dplyr::mutate(resultdf,
@@ -284,7 +285,7 @@ cromwellCache <- function(workflow_id){
       })
     }) %>% purrr::map_dfr(., function(x){ x }, .id = "callName")) #WTF?? Why does this work but reduce or flatten don't? # Fix suppression later
 
-    cacheMisses <- dplyr::full_join(cacheMisses, hitFailures, by = c("callName", "shardIndex"))
+    cacheMisses <- dplyr::full_join(cacheMisses, hitFailures, by = c("callName", "shardIndex")) %>% dplyr::mutate_if(is.factor, is.character)
     geocache <- dplyr::bind_rows(cacheHits, cacheMisses)
     } else(geocache = data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)))
   return(geocache)
