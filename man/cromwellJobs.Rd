@@ -23,7 +23,6 @@ Requires valid Cromwell URL to be set in the environment.
 setCreds(tokenSet = "file", path = "~/myCreds/secrets.R")
 ## Request what jobs have been submitted to your Cromwell instance in the past 7 days.
 recentJobs <- cromwellJobs(days = 7)
-
 }
 \author{
 Amy Paguirigan

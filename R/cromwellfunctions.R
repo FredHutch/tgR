@@ -12,7 +12,7 @@
 #' setCreds(tokenSet = "file", path = "~/myCreds/secrets.R")
 #' ## Request what jobs have been submitted to your Cromwell instance in the past 7 days.
 #' recentJobs <- cromwellJobs(days = 7)
-#'
+#' @export
 cromwellJobs <- function(days = 1) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
     stop("The cromwell URL is not set.  Please setCromwellURL().")
@@ -60,6 +60,7 @@ cromwellJobs <- function(days = 1) {
 #' ## Request workflow metadata for a specific job that was run in your Cromwell instance.
 #' thisWorkflowID <- recentJobs$workflow_id[1]
 #' workflowMeta <- cromwellWorkflow(workflow_id = thisWorkflowID)
+#' @export
 cromwellWorkflow <- function(workflow_id) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
     stop("The cromwell URL is not set.  Please setCromwellURL().")
@@ -132,6 +133,7 @@ cromwellWorkflow <- function(workflow_id) {
 #' ## Request workflow metadata for a specific job that was run in your Cromwell instance.
 #' thisWorkflowID <- recentJobs$workflow_id[1]
 #' callsMeta <- cromwellCall(workflow_id = thisWorkflowID)
+#' @export
 cromwellCall <- function(workflow_id) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
     stop("The cromwell URL is not set.  Please setCromwellURL().")
@@ -189,6 +191,7 @@ cromwellCall <- function(workflow_id) {
 #' ## Request workflow metadata for a specific job that was run in your Cromwell instance.
 #' thisWorkflowID <- recentJobs$workflow_id[1]
 #' failsMeta <- cromwellFailures(workflow_id = thisWorkflowID)
+#' @export
 cromwellFailures <- function(workflow_id) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
     stop("The cromwell URL is not set.  Please setCromwellURL().")
@@ -242,6 +245,7 @@ cromwellFailures <- function(workflow_id) {
 #' ## Request workflow metadata for a specific job that was run in your Cromwell instance.
 #' thisWorkflowID <- recentJobs$workflow_id[1]
 #' cacheMeta <- cromwellCache(workflow_id = thisWorkflowID)
+#' @export
 cromwellCache <- function(workflow_id){
   if ("" %in% Sys.getenv("CROMWELLURL")) {
     print("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
@@ -305,6 +309,7 @@ cromwellCache <- function(workflow_id){
 #' Requires valid Cromwell URL to be set in the environment.
 #' @examples
 #' TBD
+#' @export
 cromwellSubmitBatch <- function(WDL, Params, Batch, Options, Labels){
   if ("" %in% Sys.getenv("CROMWELLURL")) {
     print("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")

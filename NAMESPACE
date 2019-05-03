@@ -2,6 +2,12 @@
 
 export("%>%")
 export(annotationDictionary)
+export(cromwellCache)
+export(cromwellCall)
+export(cromwellFailures)
+export(cromwellJobs)
+export(cromwellSubmitBatch)
+export(cromwellWorkflow)
 export(listS3Objects)
 export(listS3RepoObjects)
 export(listS3RepoSummaries)
