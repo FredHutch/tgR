@@ -34,15 +34,15 @@ cromwellJobs <- function(days = 1) {
   if(nrow(cromTable)>0){
   cromTable <- dplyr::rename(cromTable, "workflow_id" = "id")
   if("end" %in% colnames(cromTable)==T& "start" %in% colnames(cromTable)==T) {
-    cromTable$start <- as.POSIXlt(cromTable$start, "UTC", "%Y-%m-%dT%H:%M:%S")
-    cromTable$end <- as.POSIXlt(cromTable$end, "UTC", "%Y-%m-%dT%H:%M:%S")
-    cromTable$submission <- as.POSIXlt(cromTable$submission, "UTC", "%Y-%m-%dT%H:%M:%S")
+    cromTable$start <- as.POSIXct(cromTable$start, "UTC", "%Y-%m-%dT%H:%M:%S")
+    cromTable$end <- as.POSIXct(cromTable$end, "UTC", "%Y-%m-%dT%H:%M:%S")
+    cromTable$submission <- as.character(as.POSIXct(cromTable$submission, "UTC", "%Y-%m-%dT%H:%M:%S"))
     cromTable$jobDuration <- round(difftime(cromTable$end, cromTable$start, units = "mins"), 3)
   } else (cromTable$jobDuration <- "NA")
   } else (cromTable = as.data.frame("No jobs in that time period"))
   return(cromTable)
-  } else {print("No jobs in that time period")}
 }
+
 #' Pull metadata for a specific Cromwell workflow job
 #'
 #' Retrieve and process all labels, submission and workflow level metadata for a specific workflow.
@@ -64,7 +64,7 @@ cromwellWorkflow <- function(workflow_id) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
     stop("The cromwell URL is not set.  Please setCromwellURL().")
   } else print("Cromwell URL set successfully.")
-
+  print("cromwellWorkflow(); Querying cromwell for workflow metadata.")
   crommetadata <-
     httr::content(httr::GET(
       paste0(
@@ -98,7 +98,9 @@ cromwellWorkflow <- function(workflow_id) {
         suppressWarnings(resultdf <- purrr::reduce(list(remainder, drag, submit), dplyr::full_join, by = "workflow_id")) # fix this warning suppression later
         if ("end" %in% colnames(resultdf) == T &
             "start" %in% colnames(resultdf) == T) {
-          resultdf <- dplyr::mutate(resultdf, workflowDuration = as.character(difftime(end, start, units = "mins")))
+          resultdf$start <- as.POSIXct(resultdf$start, "UTC", "%Y-%m-%dT%H:%M:%S")
+          resultdf$end <- as.POSIXct(resultdf$end, "UTC", "%Y-%m-%dT%H:%M:%S")
+          resultdf <- dplyr::mutate(resultdf, workflowDuration = round(difftime(end, start, units = "mins"), 3))
         } else {
           resultdf <- dplyr::mutate(resultdf,
                           end = "NA" ,
@@ -133,6 +135,7 @@ cromwellCall <- function(workflow_id) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
     stop("The cromwell URL is not set.  Please setCromwellURL().")
   } else print("Cromwell URL set successfully.")
+  print("cromwellCalls(); Querying cromwell for job calls list.")
   crommetadata <-
     httr::content(httr::GET(
       paste0(
@@ -156,8 +159,8 @@ cromwellCall <- function(workflow_id) {
       ) # Fix the warnings later.
       justCalls$workflow_id <- workflow_id
       if("end" %in% colnames(justCalls)==T & "start" %in% colnames(justCalls)==T) {
-        justCalls$start <- as.POSIXlt(justCalls$start, "UTC", "%Y-%m-%dT%H:%M:%S")
-        justCalls$end <- as.POSIXlt(justCalls$end, "UTC", "%Y-%m-%dT%H:%M:%S")
+        justCalls$start <- as.POSIXct(justCalls$start, "UTC", "%Y-%m-%dT%H:%M:%S")
+        justCalls$end <- as.POSIXct(justCalls$end, "UTC", "%Y-%m-%dT%H:%M:%S")
         justCalls$jobDuration <- round(difftime(justCalls$end, justCalls$start, units = "mins"), 3)
       } else {justCalls$jobDuration <- "NA"}
       justCalls <- justCalls %>% dplyr::select(one_of("workflow_id","callName","shardIndex", "jobId","attempt", "start","end",
@@ -189,6 +192,7 @@ cromwellFailures <- function(workflow_id) {
   if ("" %in% Sys.getenv("CROMWELLURL")) {
     stop("The cromwell URL is not set.  Please setCromwellURL().")
   } else print("Cromwell URL set successfully.")
+  print("cromwellFailures(); Querying cromwell for failed call list.")
   cromfail <-
     httr::content(httr::GET(
       paste0(
@@ -240,6 +244,7 @@ cromwellFailures <- function(workflow_id) {
 cromwellCache <- function(workflow_id){
   if ("" %in% Sys.getenv("CROMWELLURL")) {
     print("The cromwell URL is not set.  Please setCromwellURL().")} else print("Cromwell URL set successfully.")
+  print("cromwellCache(); Querying cromwell for call cacheing metadata.")
   crommetadata <- httr::content(httr::GET(paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/",
                                                  workflow_id,"/metadata?expandSubWorkflows=false")), as = "parsed")
 
