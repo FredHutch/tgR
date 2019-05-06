@@ -267,16 +267,22 @@ cromwellCache <- function(workflow_id){
         return(b)
       })
     })) # Fix suppression later
-    suppressWarnings(cacheHits <- purrr::map_dfr(bobCallMeta, function(x){
+    suppressWarnings(
+      cacheHits <- purrr::map_dfr(bobCallMeta, function(x){
       x %>% dplyr::filter(callCaching.hit == T) %>% Filter(function(x)!all(is.na(x)), .)
-    }, .id = "callName")) # Fix suppression later
+    }, .id = "callName") %>% dplyr::mutate_if(is.factor, as.character) %>% dplyr::mutate_if(is.logical, as.character)
+    ) # Fix suppression later
     cacheHits$workflow_id <- workflow_id
-    suppressWarnings(cacheMisses <- purrr::map_dfr(bobCallMeta, function(x){
+
+    suppressWarnings(
+      cacheMisses <- purrr::map_dfr(bobCallMeta, function(x){
       x %>% dplyr::filter(callCaching.hit == F) %>% Filter(function(x)!all(is.na(x)), .)
-    }, .id = "callName"))  # Fix suppression later
+    }, .id = "callName") %>% dplyr::mutate_if(is.factor, as.character) %>% dplyr::mutate_if(is.logical, as.character)
+    )  # Fix suppression later
     cacheMisses$workflow_id <- workflow_id
 
-    suppressWarnings(hitFailures <- purrr::map(bobCalls, function(eachCall){
+    suppressWarnings(
+      hitFailures <- purrr::map(bobCalls, function(eachCall){
       listofShardFrames <- purrr::map_dfr(eachCall, function(eachShard){
         c <- purrr::pluck(eachShard, "callCaching")
         d <- as.data.frame(unlist(purrr::pluck(c, "hitFailures")))
@@ -284,16 +290,19 @@ cromwellCache <- function(workflow_id){
           colnames(d) <- c("hitFailureMessage")
           d$breadCrumbs <- rownames(d)
           d$shardIndex <- eachShard$shardIndex
+          d <- d %>% dplyr::mutate_if(is.factor, as.character)
+          d <- d %>% dplyr::mutate_if(is.logical, as.character)
           return(d)
         }
       })
-    }) %>% purrr::map_dfr(., function(x){ x }, .id = "callName")) #WTF?? Why does this work but reduce or flatten don't? # Fix suppression later
+    }) %>% purrr::map_dfr(., function(x){ x }, .id = "callName") #WTF?? Why does this work but reduce or flatten don't?
+    )  # Fix suppression later
 
-    cacheMisses <- dplyr::full_join(cacheMisses, hitFailures, by = c("callName", "shardIndex")) %>% dplyr::mutate_if(is.factor, is.character)
+    cacheMisses <- dplyr::full_join(cacheMisses, hitFailures, by = c("callName", "shardIndex"))
     geocache <- dplyr::bind_rows(cacheHits, cacheMisses)
-    } else(geocache = data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)))
+    } else {geocache = setNames(data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)), c("FailureMessage"))}
   return(geocache)
-  }
+}
 #' Submit a workflow job to Cromwell
 #'
 #' Supports the submission of a fully defined workflow job to a Cromwell instance.
