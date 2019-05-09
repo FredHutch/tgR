@@ -70,40 +70,22 @@ usedIdentifiers <- function(x, type) {
   }
   return(IDs)
 }
-#' Create a snapshot of the Annotation Dictionary
+#' Create a snapshot of the Annotation Dictionary (not needed anymore)
 #'
 #' Pulls sample data down from REDCap in order to generate example column lists for use in Shiny UI's.
 #'
 #' @param commonKnowledge The commonKnowledge data frame containing current annotations via pullAnnotations().
-#' @return Nothing.  Creates character vectors containing the `categorical` annotations, the `truefalse` annotations, the union of these `fieldList`, and all columns in `summarizeList`.
+#' @return A character vector containing the `categorical` annotations in the TGR.
 #' @author Amy Paguirigan
 #' @details
 #' Requires **admin** REDCap credentials to be set in the environment.
-#' @export
 annotationDictionary <- function(commonKnowledge) {
   if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
     print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
-
   print("annotationDictionary(); setup for Shiny UI")
-  # Get representative actual column names from REDCap by pulling one dataset
-  INData <- REDCapR::redcap_read_oneshot(
-    Sys.getenv("REDURI"), Sys.getenv("INT"),
-    export_data_access_groups = TRUE, records = "21720")$data
-  FCData <- REDCapR::redcap_read_oneshot(
-    Sys.getenv("REDURI"), Sys.getenv("FCT"),
-    export_data_access_groups = TRUE, records = "22290")$data
-  MHData <- REDCapR::redcap_read_oneshot(
-    Sys.getenv("REDURI"), Sys.getenv("MHT"),
-    export_data_access_groups = TRUE, records = "M00000001")$data
-  # Column bind
-  allRCCols <- base::cbind(INData, FCData, MHData)
-  # Remove all columnd ending in _complete
-  allRCCols <- allRCCols[-grep("*_complete", colnames(allRCCols))]
-  # Create variables in environment - these need to be streamlined/fixed in the future
-  assign("categorical", colnames(allRCCols)[colnames(allRCCols) %in% commonKnowledge[commonKnowledge$Type == "categorical", ]$Annotation],  envir = .GlobalEnv)
-  assign("truefalse", colnames(allRCCols)[grep("is_", colnames(allRCCols))],  envir = .GlobalEnv)
-  assign("fieldList", c(categorical, truefalse),  envir = .GlobalEnv)
-  assign("summarizeList", colnames(allRCCols),  envir = .GlobalEnv)
+  # only display annotations in the Shiny app if they have been defined in commonKnowledge
+  categorical <- unique(commonKnowledge[commonKnowledge$Type == "categorical",]$Annotation)
+  return(categorical)
 }
 
 #' Pull the list of objects and tags in the Repository overall

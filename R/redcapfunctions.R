@@ -23,7 +23,7 @@ redcapPull <- function(domain = "all", harmonizedOnly = FALSE, evenEmptyCols = F
         if (harmonizedOnly == TRUE) {
           INfields <- REDCapR::redcap_metadata_read(Sys.getenv("REDURI"), Sys.getenv("INT"))$data
           INKeep <- INfields %>% dplyr::filter(grepl("min_*", form_name)==T) %>% dplyr::select(field_name)
-          INData <- INData %>% dplyr::select(dplyr::one_of(INKeep$field_name, "biospecimen_id"))
+          INData <- INData %>% dplyr::select(dplyr::one_of("biospecimen_id", "redcap_data_access_group", INKeep$field_name))
         }
     }
     if (domain %in% c("all", "assay")) {
@@ -35,7 +35,7 @@ redcapPull <- function(domain = "all", harmonizedOnly = FALSE, evenEmptyCols = F
         if (harmonizedOnly == TRUE) {
           FCfields <- REDCapR::redcap_metadata_read(Sys.getenv("REDURI"), Sys.getenv("FCT"))$data
           FCKeep <- FCfields %>% dplyr::filter(grepl("min_*", form_name)==T) %>% dplyr::select(field_name)
-          FCData <- FCData %>% dplyr::select(dplyr::one_of(FCKeep$field_name, "assay_material_id"))
+          FCData <- FCData %>% dplyr::select(dplyr::one_of("assay_material_id", "redcap_data_access_group", FCKeep$field_name))
           }
     }
     if (domain %in% c("all", "molecular")) {
@@ -47,7 +47,7 @@ redcapPull <- function(domain = "all", harmonizedOnly = FALSE, evenEmptyCols = F
         if (harmonizedOnly == TRUE) {
           MHfields <- REDCapR::redcap_metadata_read(Sys.getenv("REDURI"), Sys.getenv("MHT"))$data
           MHKeep <- MHfields %>% dplyr::filter(grepl("min_*", form_name)==T | grepl("data_is*", field_name) == T) %>% dplyr::select(field_name)
-          MHData <- MHData %>% dplyr::select(dplyr::one_of(MHKeep$field_name, "molecular_id"))
+          MHData <- MHData %>% dplyr::select(dplyr::one_of("molecular_id", "redcap_data_access_group", MHKeep$field_name))
           }
       }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/admin.R
 \name{annotationDictionary}
 \alias{annotationDictionary}
-\title{Create a snapshot of the Annotation Dictionary}
+\title{Create a snapshot of the Annotation Dictionary (not needed anymore)}
 \usage{
 annotationDictionary(commonKnowledge)
 }
@@ -10,7 +10,7 @@ annotationDictionary(commonKnowledge)
 \item{commonKnowledge}{The commonKnowledge data frame containing current annotations via pullAnnotations().}
 }
 \value{
-Nothing.  Creates character vectors containing the `categorical` annotations, the `truefalse` annotations, the union of these `fieldList`, and all columns in `summarizeList`.
+A character vector containing the `categorical` annotations in the TGR.
 }
 \description{
 Pulls sample data down from REDCap in order to generate example column lists for use in Shiny UI's.
