@@ -13,10 +13,10 @@ undefinedAnnotations <- function(commonKnowledge) {
     print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
 
   print("Get all data from REDCap for variables intended to be harmonized.")
-  sciMeta <- redcapPull(harmonizedOnly = TRUE)
-  sciMeta <- Filter(function(x)!all(is.na(x)), sciMeta)
+  sciMeta <- redcapPull(harmonizedOnly = TRUE, DAG = "all")
+  sciMeta <- Filter(function(x)!all(is.na(x)), sciMeta) #may be redundant
   # Remove project memberships
-  defineMe <- sciMeta %>% dplyr::select(-starts_with("is_"))
+  defineMe <- sciMeta %>% dplyr::select(-starts_with("is_")) #Slated for removal
   defineMe <- defineMe %>% dplyr::select(-starts_with("data_is_"))
   # Remove columns that are known not to need value-level definitions
   novalueLevels <- commonKnowledge %>% dplyr::filter(Type %in% c("freetext", "numeric", "date", "identifier")) %>% dplyr::select(Annotation)
@@ -84,7 +84,7 @@ annotationDictionary <- function(commonKnowledge) {
   if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
     print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
 
-  print("annotationDictionary(); setup for UI")
+  print("annotationDictionary(); setup for Shiny UI")
   # Get representative actual column names from REDCap by pulling one dataset
   INData <- REDCapR::redcap_read_oneshot(
     Sys.getenv("REDURI"), Sys.getenv("INT"),

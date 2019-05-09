@@ -4,17 +4,17 @@
 \alias{redcapPull}
 \title{Queries all TGR REDCap Projects for metadata}
 \usage{
-redcapPull(DAG = c("paguirigana", "bergera"), domain = "all",
-  harmonizedOnly = FALSE, evenEmptyCols = FALSE)
+redcapPull(domain = "all", harmonizedOnly = FALSE,
+  evenEmptyCols = FALSE, DAG)
 }
 \arguments{
-\item{DAG}{A character vector contining the name(s) of the data access group(s) for which to request data. Current DAG options include: 'paguirigana', 'aberger'.}
-
 \item{domain}{The domain of the data type to return.  Values include: `all`, `specimen`, `assay`, `molecular`}
 
 \item{harmonizedOnly}{Whether you want only the data that is harmonized across all projects (TRUE) or a complete data set (FALSE).}
 
 \item{evenEmptyCols}{Whether you want even the empty columns in your final data frame (TRUE) or if you just want columns where there is at least one value in the resulting dataset (FALSE).}
+
+\item{DAG}{(Optional) A character vector contining the name(s) of the data access group(s) for which to request data, or "all" (parameter applies to admin only).}
 }
 \value{
 Returns a long form data frame containing the requested dataset.
