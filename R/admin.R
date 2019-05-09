@@ -13,29 +13,29 @@ undefinedAnnotations <- function(commonKnowledge) {
     print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
 
   print("Get all data from REDCap for variables intended to be harmonized.")
-  sciMeta <- redcapPull(harmonizedOnly = TRUE)
-  sciMeta <- Filter(function(x)!all(is.na(x)), sciMeta)
+  sciMeta <- redcapPull(harmonizedOnly = T, DAG = "all", evenEmptyCols = F)
   # Remove project memberships
-  defineMe <- sciMeta %>% dplyr::select(-starts_with("is_"))
-  defineMe <- defineMe %>% dplyr::select(-starts_with("data_is_"))
-  # Remove columns that are known not to need value-level definitions
-  novalueLevels <- commonKnowledge %>% dplyr::filter(Type %in% c("freetext", "numeric", "date", "identifier")) %>% dplyr::select(Annotation)
-  defineMe <- select(defineMe, -one_of(novalueLevels$Annotation))
-  used <- purrr::map_dfr(colnames(defineMe), function(x){
-    Y <- unique(select(defineMe, x))
+  defineMe <- sciMeta %>% dplyr::select(-dplyr::starts_with("data_is_"))
+  categorical <- commonKnowledge %>% dplyr::filter(Type == "categorical")
+  noLevelAnnots <- commonKnowledge %>% dplyr::filter(Type != "categorical")
+
+  usedAnnots <- purrr::map_dfr(colnames(defineMe), function(x){
+    Y <- unique(dplyr::select(defineMe, x))
     colnames(Y) <- "Value"
     Y$Value <- as.character(Y$Value)
     Y$Annotation <- x
     Y
   })
-  makeMeaning <- dplyr::anti_join(used, commonKnowledge)
-  makeMeaning <- dplyr::mutate(makeMeaning, ValueDescription = NA,
-                               AnnotationDescription = NA,
-                               Type = NA, Category = NA,
-                               TabGroup = NA)
-  makeMeaning <- makeMeaning %>% select(Annotation, Value, ValueDescription,
-                                        Type, Category, AnnotationDescription,TabGroup)
 
+  usedCat <- usedAnnots %>% dplyr::filter(Annotation %in% categorical$Annotation & is.na(Value) !=T)
+  missingCat <- dplyr::anti_join(usedCat, categorical)
+
+  usedOther <- usedAnnots %>% dplyr::filter(!Annotation %in% categorical$Annotation) %>% dplyr::select(Annotation) %>% unique()
+  missingOther <- dplyr::anti_join(usedOther, noLevelAnnots)
+
+  makeMeaning <- dplyr::full_join(missingCat, missingOther)
+
+  suppressWarnings(makeMeaning <- dplyr::bind_rows(commonKnowledge[0,], makeMeaning)) # make a sample data frame to fill in
 
   return(makeMeaning)
 }
@@ -70,40 +70,22 @@ usedIdentifiers <- function(x, type) {
   }
   return(IDs)
 }
-#' Create a snapshot of the Annotation Dictionary
+#' Create a snapshot of the Annotation Dictionary (not needed anymore)
 #'
 #' Pulls sample data down from REDCap in order to generate example column lists for use in Shiny UI's.
 #'
 #' @param commonKnowledge The commonKnowledge data frame containing current annotations via pullAnnotations().
-#' @return Nothing.  Creates character vectors containing the `categorical` annotations, the `truefalse` annotations, the union of these `fieldList`, and all columns in `summarizeList`.
+#' @return A character vector containing the `categorical` annotations in the TGR.
 #' @author Amy Paguirigan
 #' @details
 #' Requires **admin** REDCap credentials to be set in the environment.
-#' @export
 annotationDictionary <- function(commonKnowledge) {
   if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
     print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
-
-  print("annotationDictionary(); setup for UI")
-  # Get representative actual column names from REDCap by pulling one dataset
-  INData <- REDCapR::redcap_read_oneshot(
-    Sys.getenv("REDURI"), Sys.getenv("INT"),
-    export_data_access_groups = TRUE, records = "21720")$data
-  FCData <- REDCapR::redcap_read_oneshot(
-    Sys.getenv("REDURI"), Sys.getenv("FCT"),
-    export_data_access_groups = TRUE, records = "22290")$data
-  MHData <- REDCapR::redcap_read_oneshot(
-    Sys.getenv("REDURI"), Sys.getenv("MHT"),
-    export_data_access_groups = TRUE, records = "M00000001")$data
-  # Column bind
-  allRCCols <- base::cbind(INData, FCData, MHData)
-  # Remove all columnd ending in _complete
-  allRCCols <- allRCCols[-grep("*_complete", colnames(allRCCols))]
-  # Create variables in environment - these need to be streamlined/fixed in the future
-  assign("categorical", colnames(allRCCols)[colnames(allRCCols) %in% commonKnowledge[commonKnowledge$Type == "categorical", ]$Annotation],  envir = .GlobalEnv)
-  assign("truefalse", colnames(allRCCols)[grep("is_", colnames(allRCCols))],  envir = .GlobalEnv)
-  assign("fieldList", c(categorical, truefalse),  envir = .GlobalEnv)
-  assign("summarizeList", colnames(allRCCols),  envir = .GlobalEnv)
+  print("annotationDictionary(); setup for Shiny UI")
+  # only display annotations in the Shiny app if they have been defined in commonKnowledge
+  categorical <- unique(commonKnowledge[commonKnowledge$Type == "categorical",]$Annotation)
+  return(categorical)
 }
 
 #' Pull the list of objects and tags in the Repository overall
