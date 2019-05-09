@@ -13,29 +13,29 @@ undefinedAnnotations <- function(commonKnowledge) {
     print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
 
   print("Get all data from REDCap for variables intended to be harmonized.")
-  sciMeta <- redcapPull(harmonizedOnly = TRUE, DAG = "all")
-  sciMeta <- Filter(function(x)!all(is.na(x)), sciMeta) #may be redundant
+  sciMeta <- redcapPull(harmonizedOnly = T, DAG = "all", evenEmptyCols = F)
   # Remove project memberships
-  defineMe <- sciMeta %>% dplyr::select(-starts_with("is_")) #Slated for removal
-  defineMe <- defineMe %>% dplyr::select(-starts_with("data_is_"))
-  # Remove columns that are known not to need value-level definitions
-  novalueLevels <- commonKnowledge %>% dplyr::filter(Type %in% c("freetext", "numeric", "date", "identifier")) %>% dplyr::select(Annotation)
-  defineMe <- select(defineMe, -one_of(novalueLevels$Annotation))
-  used <- purrr::map_dfr(colnames(defineMe), function(x){
-    Y <- unique(select(defineMe, x))
+  defineMe <- sciMeta %>% dplyr::select(-dplyr::starts_with("data_is_"))
+  categorical <- commonKnowledge %>% dplyr::filter(Type == "categorical")
+  noLevelAnnots <- commonKnowledge %>% dplyr::filter(Type != "categorical")
+
+  usedAnnots <- purrr::map_dfr(colnames(defineMe), function(x){
+    Y <- unique(dplyr::select(defineMe, x))
     colnames(Y) <- "Value"
     Y$Value <- as.character(Y$Value)
     Y$Annotation <- x
     Y
   })
-  makeMeaning <- dplyr::anti_join(used, commonKnowledge)
-  makeMeaning <- dplyr::mutate(makeMeaning, ValueDescription = NA,
-                               AnnotationDescription = NA,
-                               Type = NA, Category = NA,
-                               TabGroup = NA)
-  makeMeaning <- makeMeaning %>% select(Annotation, Value, ValueDescription,
-                                        Type, Category, AnnotationDescription,TabGroup)
 
+  usedCat <- usedAnnots %>% dplyr::filter(Annotation %in% categorical$Annotation & is.na(Value) !=T)
+  missingCat <- dplyr::anti_join(usedCat, categorical)
+
+  usedOther <- usedAnnots %>% dplyr::filter(!Annotation %in% categorical$Annotation) %>% dplyr::select(Annotation) %>% unique()
+  missingOther <- dplyr::anti_join(usedOther, noLevelAnnots)
+
+  makeMeaning <- dplyr::full_join(missingCat, missingOther)
+
+  suppressWarnings(makeMeaning <- dplyr::bind_rows(commonKnowledge[0,], makeMeaning)) # make a sample data frame to fill in
 
   return(makeMeaning)
 }

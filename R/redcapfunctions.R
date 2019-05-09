@@ -31,7 +31,6 @@ redcapPull <- function(domain = "all", harmonizedOnly = FALSE, evenEmptyCols = F
           Sys.getenv("REDURI"), Sys.getenv("FCT"),
           export_data_access_groups = T)$data %>%
           dplyr::select(-dplyr::ends_with("_complete"))
-        FCData$survival_time <- NULL #HMMMMMMM
 
         if (harmonizedOnly == TRUE) {
           FCfields <- REDCapR::redcap_metadata_read(Sys.getenv("REDURI"), Sys.getenv("FCT"))$data
@@ -47,7 +46,7 @@ redcapPull <- function(domain = "all", harmonizedOnly = FALSE, evenEmptyCols = F
 
         if (harmonizedOnly == TRUE) {
           MHfields <- REDCapR::redcap_metadata_read(Sys.getenv("REDURI"), Sys.getenv("MHT"))$data
-          MHKeep <- MHfields %>% dplyr::filter(grepl("min_*", form_name)==T) %>% dplyr::select(field_name)
+          MHKeep <- MHfields %>% dplyr::filter(grepl("min_*", form_name)==T | grepl("data_is*", field_name) == T) %>% dplyr::select(field_name)
           MHData <- MHData %>% dplyr::select(dplyr::one_of(MHKeep$field_name, "molecular_id"))
           }
       }
@@ -68,9 +67,7 @@ redcapPull <- function(domain = "all", harmonizedOnly = FALSE, evenEmptyCols = F
     if (evenEmptyCols == F) {
       results <- results %>%
         Filter(function(x)!all(is.na(x)), .) %>%
-        Filter(function(x)!all(x==0), .) %>%
-        Filter(function(x)!all(x==""), .) %>% # slated for removal
-        Filter(function(x)!all(x=="noannot"), .) # slated for removal
+        Filter(function(x)!all(x==0), .)
     }
     return(results)
 }
@@ -135,7 +132,8 @@ prepForUpload <- function(fileStem, dataToSplit) {
   if (is.character(fileStem) & length(fileStem) == 1) {
     if (is.data.frame(dataToSplit) & nrow(dataToSplit) > 0) {
 
-      specimen <- dataToSplit %>% dplyr::select(dplyr::one_of(getDictionary(project = "specimen")))
+      specimen <- dataToSplit %>% dplyr::select(dplyr::one_of(getDictionary(project = "specimen"))) %>%
+        unique() %>% dplyr::filter(biospecimen_id != "")
       if(ncol(specimen) > 0) {
       if ("biospecimen_id" %in% colnames(specimen)){
         write.csv(specimen, file = paste0(fileStem, "-TGBiospecimens.csv"), row.names = F, na = "")
@@ -143,7 +141,8 @@ prepForUpload <- function(fileStem, dataToSplit) {
       } else { print("biospecimen_id is required for this upload.")}
       }
 
-      assay <- dataToSplit %>% dplyr::select(dplyr::one_of(getDictionary(project = "assay")))
+      assay <- dataToSplit %>% dplyr::select(dplyr::one_of(getDictionary(project = "assay"))) %>%
+        unique() %>% dplyr::filter(assay_material_id != "")
       if(ncol(assay) > 0) {
       if ("assay_material_id" %in% colnames(assay)){
         write.csv(assay, file = paste0(fileStem, "-TGAssayMaterials.csv"), row.names = F, na = "")
@@ -151,7 +150,8 @@ prepForUpload <- function(fileStem, dataToSplit) {
       } else { print("assay_material_id is required for this upload.")}
       }
 
-      molecular <- dataToSplit %>% dplyr::select(dplyr::one_of(getDictionary(project = "molecular")))
+      molecular <- dataToSplit %>% dplyr::select(dplyr::one_of(getDictionary(project = "molecular"))) %>%
+        unique() %>% dplyr::filter(molecular_id != "")
       if(ncol(molecular) > 0) {
       if ("molecular_id" %in% colnames(molecular)){
         write.csv(molecular, file = paste0(fileStem, "-TGMolecularDatasets.csv"), row.names = F, na = "")
