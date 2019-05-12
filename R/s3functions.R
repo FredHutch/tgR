@@ -10,14 +10,24 @@
 #' @export
 listS3Objects <- function(bucket) {
   if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
-    print("You have missing environment variables.  Please setCreds().")} else print("Credentials set successfully.")
+    print("You have missing environment variables.  Please setCreds().")
+    } else print("Credentials set successfully.")
+
     Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
                AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
                AWS_DEFAULT_REGION = "us-west-2")
+
     print("Pulling S3 tag list(s).")
-    s3tags <- purrr::map_dfr(bucket, function(x) {aws.s3::s3read_using(utils::read.csv, stringsAsFactors = F,
-                           object = paste0("tg/apptags/", x, "-meta.csv"),
-                           bucket = x)})
+    if (bucket == "fh-pi-paguirigan-a-genomicsrepo") {
+      keys <- aws.s3::get_bucket_df(bucket = bucket,
+                                    prefix = "apptags/meta/")$Key
+    } else {
+      keys <- paste0("tg/apptags/", x, "-meta.csv") }
+
+    s3tags <- purrr::map_dfr(keys, function(x) {
+      aws.s3::s3read_using(utils::read.csv, stringsAsFactors = F,
+                           object = x,
+                           bucket = bucket)})
     return(s3tags)
 }
 #' Pull a summary of objects in S3
@@ -32,13 +42,24 @@ listS3Objects <- function(bucket) {
 #' @export
 summarizeS3Objects <- function(bucket) {
   if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
-    print("You have missing environment variables.  Please setCreds().")} else print("Credentials set successfully.")
+    print("You have missing environment variables.  Please setCreds().")
+    } else print("Credentials set successfully.")
+
   Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
              AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
              AWS_DEFAULT_REGION = "us-west-2")
+
   print("Pulling S3 object summary.")
-  s3summary <- purrr::map_dfr(bucket, function(x) {aws.s3::s3read_using(utils::read.csv, stringsAsFactors = F,
-                                                                     object = paste0("tg/apptags/", x, "-summary.csv"),
-                                                                     bucket = x)})
+
+  if (bucket == "fh-pi-paguirigan-a-genomicsrepo") {
+    keys <- aws.s3::get_bucket_df(bucket = bucket, prefix = "apptags/summary/")$Key
+  } else {
+    keys <- paste0("tg/apptags/", x, "-summary.csv") }
+
+  s3summary <- purrr::map_dfr(keys, function(x) {
+    aws.s3::s3read_using(utils::read.csv, stringsAsFactors = F,
+                         object = x,
+                         bucket = bucket)})
   return(s3summary)
 }
+
