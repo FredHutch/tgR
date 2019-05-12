@@ -22,7 +22,7 @@ listS3Objects <- function(bucket) {
       keys <- aws.s3::get_bucket_df(bucket = bucket,
                                     prefix = "apptags/meta/")$Key
     } else {
-      keys <- paste0("tg/apptags/", x, "-meta.csv") }
+      keys <- paste0("tg/apptags/", bucket, "-meta.csv") }
 
     s3tags <- purrr::map_dfr(keys, function(x) {
       aws.s3::s3read_using(utils::read.csv, stringsAsFactors = F,
@@ -54,7 +54,7 @@ summarizeS3Objects <- function(bucket) {
   if (bucket == "fh-pi-paguirigan-a-genomicsrepo") {
     keys <- aws.s3::get_bucket_df(bucket = bucket, prefix = "apptags/summary/")$Key
   } else {
-    keys <- paste0("tg/apptags/", x, "-summary.csv") }
+    keys <- paste0("tg/apptags/", bucket, "-summary.csv") }
 
   s3summary <- purrr::map_dfr(keys, function(x) {
     aws.s3::s3read_using(utils::read.csv, stringsAsFactors = F,
