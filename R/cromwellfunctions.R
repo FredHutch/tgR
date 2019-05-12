@@ -161,14 +161,18 @@ cromwellCall <- function(workflow_id) {
         }) %>% purrr::map_dfr(., function(x) {x}, .id = "callName")
       ) # Fix the warnings later.
       justCalls$workflow_id <- workflow_id
-      if("end" %in% colnames(justCalls)==T & "start" %in% colnames(justCalls)==T) {
+      if("start" %in% colnames(justCalls)==T) {
         justCalls$start <- as.POSIXct(justCalls$start, "UTC", "%Y-%m-%dT%H:%M:%S")
-        justCalls$end <- as.POSIXct(justCalls$end, "UTC", "%Y-%m-%dT%H:%M:%S")
-        justCalls$jobDuration <- round(difftime(justCalls$end, justCalls$start, units = "mins"), 3)
-      } else {justCalls$jobDuration <- "NA"}
-      justCalls <- justCalls %>% dplyr::select(one_of("workflow_id","callName","shardIndex", "jobId","attempt", "start","end",
+        if("end" %in% colnames(justCalls)==T) {
+          justCalls$end <- as.POSIXct(justCalls$end, "UTC", "%Y-%m-%dT%H:%M:%S")
+          justCalls$jobDuration <- round(difftime(justCalls$end, justCalls$start, units = "mins"), 3)
+        }
+      } else {
+        justCalls$jobDuration <- NA
+        justCalls$end <- NA}
+      justCalls <- justCalls[,colnames(justCalls) %in% c("workflow_id","callName","shardIndex", "jobId","attempt", "start","end",
                              "executionStatus", "returnCode", "stdout", "compressedDockerSize", "backend", "stderr",
-                             "callRoot", "backendStatus", "commandLine", "dockerImageUsed", "retryableFailure", "jobDuration"))
+                             "callRoot", "backendStatus", "commandLine", "dockerImageUsed", "retryableFailure", "jobDuration")]
     } else(justCalls = as.data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)))
   }
   return(justCalls)
