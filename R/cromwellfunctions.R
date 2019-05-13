@@ -259,7 +259,8 @@ cromwellCache <- function(workflow_id){
 
   if(is.list(crommetadata$calls)==T){ # if there are calls to be queried, continue
     bobCalls <- purrr::pluck(crommetadata, "calls") # we only want the calls data from the metadata for this workflow
-    suppressWarnings(bobCallMeta <- purrr::map(bobCalls, function(x){ # for each of the calls in the workflow...
+    suppressWarnings(
+      bobCallMeta <- purrr::map(bobCalls, function(x){ # for each of the calls in the workflow...
       purrr::map_dfr(x , function(y){ # and for each of the shards in that workflow...
         a <- purrr::keep(y, names(y) %in% c("callCaching", "inputs", "outputs")) # select only these lists
         b <- as.data.frame(rbind(unlist(a))) # flatten them and make them a data frame
@@ -270,17 +271,24 @@ cromwellCache <- function(workflow_id){
         b<- b %>% dplyr::select(-dplyr::starts_with("callCaching.hitFailures")) # then remove any data from the messy hitFailures lists
         return(b)
       })
-    })) # Fix suppression later
+    })
+    ) # Fix suppression later
     suppressWarnings(
       cacheHits <- purrr::map_dfr(bobCallMeta, function(x){
-      x %>% dplyr::filter(callCaching.hit == T) %>% Filter(function(x)!all(is.na(x)), .)
-    }, .id = "callName") %>% dplyr::mutate_if(is.factor, as.character) %>% dplyr::mutate_if(is.logical, as.character)
+        if("callCaching.hit"%in% colnames(x)){
+          y <- x %>% dplyr::filter(callCaching.hit == T) %>% Filter(function(x)!all(is.na(x)), .)
+        } else {y <- x}# setNames(data.frame(paste0("No Calls were cached for the workflow_id: ", x$workflow_id)), c("callCaching.hit"))}
+        return(y)
+        }, .id = "callName") %>% dplyr::mutate_if(is.factor, as.character) %>% dplyr::mutate_if(is.logical, as.character)
     ) # Fix suppression later
     cacheHits$workflow_id <- workflow_id
 
     suppressWarnings(
       cacheMisses <- purrr::map_dfr(bobCallMeta, function(x){
-      x %>% dplyr::filter(callCaching.hit == F) %>% Filter(function(x)!all(is.na(x)), .)
+        if("callCaching.hit" %in% colnames(x)){
+          y<- x %>% dplyr::filter(callCaching.hit == F) %>% Filter(function(x)!all(is.na(x)), .)
+        } else {y <- x}#setNames(data.frame(paste0("No Calls were cached for the workflow_id: ", x$workflow_id)), c("callCaching.hit"))}
+        return(y)
     }, .id = "callName") %>% dplyr::mutate_if(is.factor, as.character) %>% dplyr::mutate_if(is.logical, as.character)
     )  # Fix suppression later
     cacheMisses$workflow_id <- workflow_id
@@ -289,6 +297,9 @@ cromwellCache <- function(workflow_id){
       hitFailures <- purrr::map(bobCalls, function(eachCall){
       listofShardFrames <- purrr::map_dfr(eachCall, function(eachShard){
         c <- purrr::pluck(eachShard, "callCaching")
+        if(c$effectiveCallCachingMode == F){
+          d <- c[colnames(c) %in% c("shardIndex", "callCaching.allowResultReuse", "callCaching.effectiveCallCachingMode")]}
+        else {
         d <- as.data.frame(unlist(purrr::pluck(c, "hitFailures")))
         if(nrow(d)>0){
           colnames(d) <- c("hitFailureMessage")
@@ -298,11 +309,13 @@ cromwellCache <- function(workflow_id){
           d <- d %>% dplyr::mutate_if(is.logical, as.character)
           return(d)
         }
-      })
+      }})
     }) %>% purrr::map_dfr(., function(x){ x }, .id = "callName") #WTF?? Why does this work but reduce or flatten don't?
     )  # Fix suppression later
 
-    cacheMisses <- dplyr::full_join(cacheMisses, hitFailures, by = c("callName", "shardIndex"))
+    if("shardIndex" %in% colnames(cacheMisses) & "shardIndex" %in% colnames(hitFailures)){
+      cacheMisses <- dplyr::full_join(cacheMisses, hitFailures, by = c("callName", "shardIndex"))
+    } else {cacheMisses <- dplyr::full_join(cacheMisses, hitFailures, by = c("callName"))}
     geocache <- dplyr::bind_rows(cacheHits, cacheMisses)
     } else {geocache = setNames(data.frame(paste0("There are no calls associated with the workflow_id: ", workflow_id)), c("FailureMessage"))}
   return(geocache)
