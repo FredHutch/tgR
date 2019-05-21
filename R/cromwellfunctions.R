@@ -175,9 +175,11 @@ cromwellCall <- function(workflow_id) {
           purrr::map_dfr(callData, function(shardData) {
             y <- purrr::discard(shardData, is.list)
             Z <- as.data.frame(rbind(unlist(y)))
+            if(is.null(shardData$runtimeAttributes) == F){
             runTime <- purrr::pluck(shardData, "runtimeAttributes")
             Z1 <- as.data.frame(rbind(unlist(runTime)))
-            cbind(Z, Z1)
+            Z <- cbind(Z, Z1)
+            }
           })
         }) %>% purrr::map_dfr(., function(x) {x}, .id = "callName")
       ) # Fix the warnings later.
@@ -187,6 +189,9 @@ cromwellCall <- function(workflow_id) {
         if("end" %in% colnames(justCalls)==T) {
           justCalls$end <- as.POSIXct(justCalls$end, "UTC", "%Y-%m-%dT%H:%M:%S")
           justCalls$jobDuration <- round(difftime(justCalls$end, justCalls$start, units = "mins"), 3)
+        } else {
+          justCalls$jobDuration <- NA
+          justCalls$end <- NA
         }
       } else {
         justCalls$jobDuration <- NA
