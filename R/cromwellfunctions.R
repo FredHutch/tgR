@@ -420,8 +420,14 @@ cromwellOutputs <- function(workflow_id){
   cromDat <- httr::GET(url = paste0(Sys.getenv("CROMWELLURL"),"/api/workflows/v1/", workflow_id, "/outputs"))
   cromResponse <- httr::content(cromDat, as = "parsed")
   if(length(cromResponse$outputs)>0){
-    outputsDf <- purrr::map_dfr(purrr::map(cromResponse$outputs, unlist), cbind)
+    outputsDf <- purrr::map_dfr(cromResponse$outputs, function(x) {
+      Z <- data.frame("s3URL" = unlist(x), stringsAsFactors = F)
+      dplyr::mutate(Z, shardIndex = seq(from = 0, to = nrow(Z)-1, by = 1))
+    }, .id = "workflowOutputType")
+    outputsDf$s3Prefix <- gsub("s3://[^/]*/", "", outputsDf$s3URL)
+    outputsDf$s3Bucket <- gsub("/.*$", "", gsub("s3://", "", outputsDf$s3URL))
     outputsDf$workflow_id <- workflow_id
+    outputsDf$workflowName <- gsub("/.*$", "", gsub("cromwell-output/", "", outputsDf$s3Prefix))
   } else {print("No outputs are available for this workflow.")}
   return(outputsDf)
 }
@@ -452,6 +458,8 @@ cromwellLogs <- function(workflow_id){
   return(callsFlat)
 }
 
+
+
 # ## Mongodb query for AWS Batch
 # batchQuery <- function(callDat) {
 #   require(mongolite); require(dplyr)
@@ -464,4 +472,6 @@ cromwellLogs <- function(workflow_id){
 #   #  filter(timestamp == max(timestamp)) %>% arrange(desc(timestamp))
 #   return(batchDat)
 # }
+
+
 
