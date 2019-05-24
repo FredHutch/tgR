@@ -12,10 +12,10 @@ listS3Objects <- function(bucket) {
   if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
     print("You have missing environment variables.  Please setCreds().")
     } else print("Credentials set successfully.")
-
+  if(Sys.getenv("AWS_ACCESS_KEY_ID") == "") {
     Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
                AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
-               AWS_DEFAULT_REGION = "us-west-2")
+               AWS_DEFAULT_REGION = "us-west-2")} # only set them if they are unset
 
     print("Pulling S3 tag list(s).")
     if (bucket == "fh-pi-paguirigan-a-genomicsrepo") {
@@ -44,10 +44,10 @@ summarizeS3Objects <- function(bucket) {
   if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
     print("You have missing environment variables.  Please setCreds().")
     } else print("Credentials set successfully.")
-
+  if(Sys.getenv("AWS_ACCESS_KEY_ID") == "") {
   Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
              AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
-             AWS_DEFAULT_REGION = "us-west-2")
+             AWS_DEFAULT_REGION = "us-west-2")}
 
   print("Pulling S3 object summary.")
 
@@ -81,9 +81,10 @@ s3_copy_and_tag <- function(fromBucket, fromPrefix, toBucket, toPrefix, tagList)
     stop("You have missing environment variables.  Please setCreds().")
   }
   if (is.list(tagList) == F) {stop("tagList needs to be a named list for this to work like you want it to.")} else {
-  Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
+    if(Sys.getenv("AWS_ACCESS_KEY_ID") == "") {
+    Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
              AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
-             AWS_DEFAULT_REGION = "us-west-2")
+             AWS_DEFAULT_REGION = "us-west-2")}
 
   if ("molecular_id" %in% names(tagList)){
     a <- aws.s3::copy_object(from_object = fromPrefix,
