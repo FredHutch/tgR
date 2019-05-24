@@ -80,6 +80,7 @@ s3_copy_and_tag <- function(fromBucket, fromPrefix, toBucket, toPrefix, tagList)
   if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
     stop("You have missing environment variables.  Please setCreds().")
   }
+  if (is.list(tagList) == F) {stop("tagList needs to be a named list for this to work like you want it to.")} else {
   Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
              AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
              AWS_DEFAULT_REGION = "us-west-2")
@@ -93,8 +94,9 @@ s3_copy_and_tag <- function(fromBucket, fromPrefix, toBucket, toPrefix, tagList)
     b <- aws.s3::put_object_tagging(bucket = toBucket,
                                     object = toPrefix,
                                     tags = tagList)
-    return(list(a,b))
-  } else {stop("The tag molecular_id is required.")}
+    return(list(object = paste0("s3://", toBucket, "/", toPrefix), upload = a, tagged = b))
+  } else {stop("The tag molecular_id is required because that's the ENTIRE point.")}
+  }
 }
 
 #' Prep a data frame for s3_copy_and_tag()
@@ -110,15 +112,15 @@ s3_copy_and_tag <- function(fromBucket, fromPrefix, toBucket, toPrefix, tagList)
 prep_s3_copy_and_tag <- function(thisDataFrameofMine){
   if (is.data.frame(thisDataFrameofMine)==T){
     if (ncol(thisDataFrameofMine[,c("molecular_id", "s3Prefix", "s3Bucket", "s3DestinationPrefix", "s3DestinationBucket")]) == 5) {
-      tibbList <- list(rep(list(), nrow(thisDataFrameofMine)))
+      objectNTagList <- list(rep(list(), nrow(thisDataFrameofMine)))
       for (i in seq(from = 1, to = nrow(thisDataFrameofMine), by = 1)) {
-        tibbList[[i]] <- list(s3Bucket = thisDataFrameofMine$s3Bucket[i],
+        objectNTagList[[i]] <- list(s3Bucket = thisDataFrameofMine$s3Bucket[i],
                                 s3Prefix = thisDataFrameofMine$s3Prefix[i],
                                 s3DestinationBucket = thisDataFrameofMine$s3DestinationBucket[i],
                                 s3DestinationPrefix = thisDataFrameofMine$s3DestinationPrefix[i],
                                 tagSet = as.list(thisDataFrameofMine[i,!names(thisDataFrameofMine) %in% c("s3Prefix", "s3Bucket", "s3DestinationPrefix", "s3DestinationBucket")]))
       }
-      return(tibbList)
+      return(objectNTagList)
     } else {stop("There are missing or incorrectly named columns: molecular_id, s3Prefix, s3Bucket, s3DestinationPrefix, s3DestinationBucket")}
   } else {stop("Please provide a data frame as input.")}
 }
