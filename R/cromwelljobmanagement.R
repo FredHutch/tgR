@@ -29,6 +29,7 @@ cromwellSubmitBatch <-
           workflowInputs_2 = httr::upload_file(Batch),
           labels = jsonlite::toJSON(as.list(Labels), auto_unbox = TRUE),
           workflowOptions = httr::upload_file(Options)
+          #workflow dependences for the zip'd file of subworkflows
         ),
         encode = "multipart"
       )
