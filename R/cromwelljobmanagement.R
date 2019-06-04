@@ -15,22 +15,32 @@
 #' TBD
 #' @export
 cromwellSubmitBatch <-
-  function(WDL, Params, Batch, Options, Labels) {
+  function(WDL, Params, Batch, Options, Labels, Dependencies = NULL) {
     if ("" %in% Sys.getenv("CROMWELLURL")) {
       stop("CROMWELLURL is not set.")
     } else
       print("Submitting a batch workflow to Cromwell.")
-    cromDat <-
-      httr::POST(
-        url = paste0(Sys.getenv("CROMWELLURL"), "/api/workflows/v1"),
-        body = list(
+    if (is.null(Dependencies) == F) {
+      bodyList <- list(
+        wdlSource = httr::upload_file(WDL),
+        workflowInputs = httr::upload_file(Params),
+        workflowInputs_2 = httr::upload_file(Batch),
+        labels = jsonlite::toJSON(as.list(Labels), auto_unbox = TRUE),
+        workflowOptions = httr::upload_file(Options),
+        workflowDependencies = httr::upload_file(Dependencies)
+      )} else {
+        bodyList <- list(
           wdlSource = httr::upload_file(WDL),
           workflowInputs = httr::upload_file(Params),
           workflowInputs_2 = httr::upload_file(Batch),
           labels = jsonlite::toJSON(as.list(Labels), auto_unbox = TRUE),
           workflowOptions = httr::upload_file(Options)
-          #workflow dependences for the zip'd file of subworkflows
-        ),
+        )
+      }
+    cromDat <-
+      httr::POST(
+        url = paste0(Sys.getenv("CROMWELLURL"), "/api/workflows/v1"),
+        body = bodyList,
         encode = "multipart"
       )
     cromResponse <-
@@ -109,6 +119,8 @@ cromwellOutputs <- function(workflow_id) {
       gsub("/.*$",
            "",
            gsub("cromwell-output/", "", outputsDf$s3Prefix))
+    outputsDf$shardIndex <-  gsub("/.*$", "",
+                                       gsub("^.*shard-", "", outputsDf$s3Prefix))
   } else {
     print("No outputs are available for this workflow.")
   }
