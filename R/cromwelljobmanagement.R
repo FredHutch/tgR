@@ -2,11 +2,12 @@
 #'
 #' Supports the submission of a fully defined workflow job to a Cromwell instance.
 #'
-#' @param WDL Local path to the wdl file describing the workflow.
-#' @param Params Local path to the json containing the parameters to use with the workflow.
-#' @param Batch Local path to the json containing a reference to any batch file desired if the workflow is a batch.
-#' @param Options Local path to the json containing workflow options to apply.
-#' @param Labels A data frame containing the labels for this workflow.
+#' @param WDL Local path to the wdl file describing the workflow. (Required)
+#' @param Params Local path to the json containing the parameters to use with the workflow. (Optional)
+#' @param Batch Local path to the json containing a reference to any batch file desired if the workflow is a batch. (Required)
+#' @param Options Local path to the json containing workflow options to apply.(Optional)
+#' @param Labels A data frame containing the labels for this workflow.(Optional)
+#' @param Dependencies A zip'd file of subworkflow dependencies. (Optional)
 #' @return Returns the response from the API post which includes the workflow ID that you'll need to monitor the job.
 #' @author Amy Paguirigan
 #' @details
@@ -15,28 +16,21 @@
 #' TBD
 #' @export
 cromwellSubmitBatch <-
-  function(WDL, Params, Batch, Options, Labels, Dependencies = NULL) {
-    if ("" %in% Sys.getenv("CROMWELLURL")) {
+  function(WDL, Params=NULL, Batch, Options=NULL, Labels=NULL, Dependencies = NULL) {
+    if("" %in% Sys.getenv("CROMWELLURL")) {
       stop("CROMWELLURL is not set.")
     } else
       print("Submitting a batch workflow to Cromwell.")
-    if (is.null(Dependencies) == F) {
-      bodyList <- list(
-        wdlSource = httr::upload_file(WDL),
-        workflowInputs = httr::upload_file(Params),
-        workflowInputs_2 = httr::upload_file(Batch),
-        labels = jsonlite::toJSON(as.list(Labels), auto_unbox = TRUE),
-        workflowOptions = httr::upload_file(Options),
-        workflowDependencies = httr::upload_file(Dependencies)
-      )} else {
-        bodyList <- list(
-          wdlSource = httr::upload_file(WDL),
-          workflowInputs = httr::upload_file(Params),
-          workflowInputs_2 = httr::upload_file(Batch),
-          labels = jsonlite::toJSON(as.list(Labels), auto_unbox = TRUE),
-          workflowOptions = httr::upload_file(Options)
-        )
-      }
+
+    bodyList <- list(
+      wdlSource = httr::upload_file(WDL),
+      workflowInputs = httr::upload_file(Batch))
+
+    if(is.null(Dependencies) == F) bodyList <- c(bodyList, workflowDependencies = list(httr::upload_file(Dependencies)))
+    if(is.null(Options) == F) bodyList <- c(bodyList, workflowOptions = list(httr::upload_file(Options)))
+    if(is.null(Labels) == F) bodyList <- c(bodyList, labels = list(jsonlite::toJSON(as.list(Labels), auto_unbox = TRUE)))
+    if(is.null(Params) == F) bodyList <- c(bodyList, workflowInputs_2 = list(httr::upload_file(Params)))
+
     cromDat <-
       httr::POST(
         url = paste0(Sys.getenv("CROMWELLURL"), "/api/workflows/v1"),
