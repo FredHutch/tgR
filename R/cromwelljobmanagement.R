@@ -99,11 +99,7 @@ cromwellOutputs <- function(workflow_id) {
   if (length(cromResponse$outputs) > 0) {
     outputsDf <- purrr::map_dfr(cromResponse$outputs, function(x) {
       Z <- data.frame("s3URL" = unlist(x), stringsAsFactors = F)
-      dplyr::mutate(Z, shardIndex = seq(
-        from = 0,
-        to = nrow(Z) - 1,
-        by = 1
-      ))
+      dplyr::mutate(Z, shardIndex = gsub("/.*$", "", gsub("^.*shard-", "", Z$s3URL)))
     }, .id = "workflowOutputType")
     outputsDf$s3Prefix <- gsub("s3://[^/]*/", "", outputsDf$s3URL)
     outputsDf$s3Bucket <-
@@ -113,8 +109,6 @@ cromwellOutputs <- function(workflow_id) {
       gsub("/.*$",
            "",
            gsub("cromwell-output/", "", outputsDf$s3Prefix))
-    outputsDf$shardIndex <-  gsub("/.*$", "",
-                                       gsub("^.*shard-", "", outputsDf$s3Prefix))
   } else {
     print("No outputs are available for this workflow.")
   }
