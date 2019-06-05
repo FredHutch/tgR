@@ -4,18 +4,21 @@
 \alias{cromwellSubmitBatch}
 \title{Submit a workflow job to Cromwell}
 \usage{
-cromwellSubmitBatch(WDL, Params, Batch, Options, Labels)
+cromwellSubmitBatch(WDL, Params = NULL, Batch, Options = NULL,
+  Labels = NULL, Dependencies = NULL)
 }
 \arguments{
-\item{WDL}{Local path to the wdl file describing the workflow.}
+\item{WDL}{Local path to the wdl file describing the workflow. (Required)}
 
-\item{Params}{Local path to the json containing the parameters to use with the workflow.}
+\item{Params}{Local path to the json containing the parameters to use with the workflow. (Optional)}
 
-\item{Batch}{Local path to the json containing a reference to any batch file desired if the workflow is a batch.}
+\item{Batch}{Local path to the json containing a reference to any batch file desired if the workflow is a batch. (Required)}
 
-\item{Options}{Local path to the json containing workflow options to apply.}
+\item{Options}{Local path to the json containing workflow options to apply.(Optional)}
 
-\item{Labels}{A data frame containing the labels for this workflow.}
+\item{Labels}{A data frame containing the labels for this workflow.(Optional)}
+
+\item{Dependencies}{A zip'd file of subworkflow dependencies. (Optional)}
 }
 \value{
 Returns the response from the API post which includes the workflow ID that you'll need to monitor the job.

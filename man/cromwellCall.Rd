@@ -4,10 +4,12 @@
 \alias{cromwellCall}
 \title{Pull metadata for the calls made in a Cromwell workflow job}
 \usage{
-cromwellCall(workflow_id)
+cromwellCall(workflow_id, expandSubWorkflows = F)
 }
 \arguments{
 \item{workflow_id}{The workflow ID to return call metadata on.}
+
+\item{expandSubWorkflows}{Boolean, whether to expand subworkflows in the results or not, default is F.}
 }
 \value{
 Returns a long form data frame of metadata on calls.
