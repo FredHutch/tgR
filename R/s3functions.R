@@ -119,7 +119,9 @@ prep_s3_copy_and_tag <- function(thisDataFrameofMine){
                                 s3Prefix = thisDataFrameofMine$s3Prefix[i],
                                 s3DestinationBucket = thisDataFrameofMine$s3DestinationBucket[i],
                                 s3DestinationPrefix = thisDataFrameofMine$s3DestinationPrefix[i],
-                                tagSet = as.list(thisDataFrameofMine[i,!names(thisDataFrameofMine) %in% c("s3Prefix", "s3Bucket", "s3DestinationPrefix", "s3DestinationBucket")]))
+                                tagSet = as.list(
+                                  thisDataFrameofMine[i,!names(thisDataFrameofMine) %in%
+                                                        c("s3Prefix", "s3Bucket", "s3DestinationPrefix", "s3DestinationBucket")]))
       }
       return(objectNTagList)
     } else {stop("There are missing or incorrectly named columns: molecular_id, s3Prefix, s3Bucket, s3DestinationPrefix, s3DestinationBucket")}
