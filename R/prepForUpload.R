@@ -20,7 +20,7 @@ prepForUpload <- function(fileStem, dataToSplit) {
       specimen <- specimen %>% unique() %>% dplyr::filter(biospecimen_id != "")
       if(ncol(specimen) > 0) {
         if ("biospecimen_id" %in% colnames(specimen)){
-          specimen <- specimen %>% select("biospecimen_id", everything())
+          specimen <- specimen %>% dplyr::select("biospecimen_id", dplyr::everything())
           write.csv(specimen, file = paste0(fileStem, "-TGBiospecimens.csv"), row.names = F, na = "")
           print(paste0("Writing File: ", paste0(fileStem, "-TGBiospecimens.csv")))
         } else { stop("biospecimen_id is required for this upload.")}
@@ -30,7 +30,7 @@ prepForUpload <- function(fileStem, dataToSplit) {
       assay <- assay %>% unique() %>% dplyr::filter(assay_material_id != "")
       if(ncol(assay) > 0) {
         if ("assay_material_id" %in% colnames(assay)){
-          assay <- assay %>% select("assay_material_id", "biospecimen_id", everything())
+          assay <- assay %>% dplyr::select("assay_material_id", "biospecimen_id", dplyr::everything())
           write.csv(assay, file = paste0(fileStem, "-TGAssayMaterials.csv"), row.names = F, na = "")
           print(paste0("Writing File: ", paste0(fileStem, "-TGAssayMaterials.csv")))
         } else { stop("assay_material_id is required for this upload.")}
@@ -40,7 +40,7 @@ prepForUpload <- function(fileStem, dataToSplit) {
       molecular <- molecular %>% unique() %>% dplyr::filter(molecular_id != "")
       if(ncol(molecular) > 0) {
         if ("molecular_id" %in% colnames(molecular)){
-          molecular <- molecular %>% select("molecular_id", "assay_material_id", everything())
+          molecular <- molecular %>% dplyr::select("molecular_id", "assay_material_id", dplyr::everything())
           write.csv(molecular, file = paste0(fileStem, "-TGMolecularDatasets.csv"), row.names = F, na = "")
           print(paste0("Writing File: ", paste0(fileStem, "-TGMolecularDatasets.csv")))
         } else { stop("molecular_id is required for this upload.")}
