@@ -451,6 +451,16 @@ cromwellFailures <- function(workflow_id) {
         x
       }, .id = "callName")
       faildf$workflow_id <- workflow_id
+      # this section creates a URL for where the stderr log for the failed jobs likely are.
+      # This is hardcoded for ALP right now b/c it's not part of what Cromwell returns.
+      temp1 <- data.frame(do.call('rbind',strsplit(faildf$callName, split = "[.]")))
+      colnames(temp1)<- c("workflowName", "call")
+      faildf <- cbind(faildf, temp1)
+      faildf$stderrPrefix <- paste0("cromwell-output/",
+                                faildf$workflowName,"/", faildf$workflow_id, "/call-", faildf$call,
+                                "/shard-", faildf$shardIndex, "/", faildf$call, "-", faildf$shardIndex,
+                                "-stderr.log")
+
       if ("failures.message" %in% colnames(faildf)) {
         faildf <- dplyr::filter(faildf, is.na(failures.message) == F)
       } else {
