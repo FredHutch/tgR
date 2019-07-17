@@ -1,45 +1,3 @@
-#' Finds undefined REDCap variables
-#'
-#' Pulls sample data down from REDCap and compares them with the defined annotation list in GitHub and identifies variables in REDCap that need defining in GitHub.  Only variables for which there is a value in at least one record are returned.
-#'
-#' @param commonKnowledge The commonKnowledge data frame containing current annotations via pullAnnotations().
-#' @return A data frame of makeMeaning.  This is a template to add to the commonKnowledge dataframe with new definitions or corrections.
-#' @author Amy Paguirigan
-#' @details
-#' Requires **admin** REDCap credentials to be set in the environment.
-#' @export
-undefinedAnnotations <- function(commonKnowledge) {
-  if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
-    print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
-
-  print("Get all data from REDCap for variables intended to be harmonized.")
-  sciMeta <- redcapPull(harmonizedOnly = T, DAG = "all", evenEmptyCols = F)
-  # Remove project memberships
-  defineMe <- sciMeta %>% dplyr::select(-dplyr::starts_with("data_is_"))
-  categorical <- commonKnowledge %>% dplyr::filter(Type == "categorical")
-  noLevelAnnots <- commonKnowledge %>% dplyr::filter(Type != "categorical")
-
-  usedAnnots <- purrr::map_dfr(colnames(defineMe), function(x){
-    Y <- unique(dplyr::select(defineMe, x))
-    colnames(Y) <- "Value"
-    Y$Value <- as.character(Y$Value)
-    Y$Annotation <- x
-    Y
-  })
-
-  usedCat <- usedAnnots %>% dplyr::filter(Annotation %in% categorical$Annotation & is.na(Value) !=T)
-  missingCat <- dplyr::anti_join(usedCat, categorical)
-
-  usedOther <- usedAnnots %>% dplyr::filter(!Annotation %in% categorical$Annotation) %>% dplyr::select(Annotation) %>% unique()
-  missingOther <- dplyr::anti_join(usedOther, noLevelAnnots)
-
-  makeMeaning <- dplyr::full_join(missingCat, missingOther)
-
-  suppressWarnings(makeMeaning <- dplyr::bind_rows(commonKnowledge[0,], makeMeaning)) # make a sample data frame to fill in
-
-  return(makeMeaning)
-}
-
 #' Test if identifiers have already been used in the TGR.
 #'
 #' @param x Character vector of proposed identifiers.
@@ -51,22 +9,23 @@ undefinedAnnotations <- function(commonKnowledge) {
 #' @export
 usedIdentifiers <- function(x, type) {
   if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
-    print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
+    stop("You have missing environment variables.  Please set creds in env vars.")}
+  else print("Credentials set successfully.")
 
   if (type == "biospecimen_id") {
-    IDs <- REDCapR::redcap_read_oneshot(
+    IDs <- suppressMessages(REDCapR::redcap_read_oneshot(
       Sys.getenv("REDURI"), Sys.getenv("INT"),
-      records = x, fields = type)$data
+      records = x, fields = type)$data)
   }
   if (type == "assay_material_id") {
-    IDs <- REDCapR::redcap_read_oneshot(
+    IDs <- suppressMessages(REDCapR::redcap_read_oneshot(
       Sys.getenv("REDURI"), Sys.getenv("FCT"),
-      records = x, fields = type)$data
+      records = x, fields = type)$data)
   }
   if (type == "molecular_id") {
-    IDs <- REDCapR::redcap_read_oneshot(
+    IDs <- suppressMessages(REDCapR::redcap_read_oneshot(
       Sys.getenv("REDURI"), Sys.getenv("MHT"),
-      records = x, fields = type)$data
+      records = x, fields = type)$data)
   }
   return(IDs)
 }

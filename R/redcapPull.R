@@ -13,39 +13,47 @@
 #' @export
 redcapPull <- function(domain = "all", harmonizedOnly = FALSE, evenEmptyCols = FALSE, DAG) {
   if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT"))) {
-    print("You have missing environment variables.  Please setCreds().")} else print("Credentials set successfully.")
+    stop("You have missing environment variables.  Please setCreds().")}
+  else print("Credentials set successfully.")
+
   if (domain %in% c("all", "specimen")) {
-        INData <- REDCapR::redcap_read_oneshot(
+        INData <- suppressMessages(
+          REDCapR::redcap_read_oneshot(
           Sys.getenv("REDURI"), Sys.getenv("INT"),
           export_data_access_groups = T)$data %>%
-          dplyr::select(-dplyr::ends_with("_complete"))
+          dplyr::select(-dplyr::ends_with("_complete")))
 
         if (harmonizedOnly == TRUE) {
-          INfields <- REDCapR::redcap_metadata_read(Sys.getenv("REDURI"), Sys.getenv("INT"))$data
+          INfields <- suppressMessages(
+            REDCapR::redcap_metadata_read(Sys.getenv("REDURI"), Sys.getenv("INT"))$data)
           INKeep <- INfields %>% dplyr::filter(grepl("min_*", form_name)==T) %>% dplyr::select(field_name)
           INData <- INData %>% dplyr::select(dplyr::one_of("biospecimen_id", "redcap_data_access_group", INKeep$field_name))
         }
     }
     if (domain %in% c("all", "assay")) {
-        FCData <- REDCapR::redcap_read_oneshot(
+        FCData <- suppressMessages(
+          REDCapR::redcap_read_oneshot(
           Sys.getenv("REDURI"), Sys.getenv("FCT"),
           export_data_access_groups = T)$data %>%
-          dplyr::select(-dplyr::ends_with("_complete"))
+          dplyr::select(-dplyr::ends_with("_complete")))
 
         if (harmonizedOnly == TRUE) {
-          FCfields <- REDCapR::redcap_metadata_read(Sys.getenv("REDURI"), Sys.getenv("FCT"))$data
+          FCfields <- suppressMessages(
+            REDCapR::redcap_metadata_read(Sys.getenv("REDURI"), Sys.getenv("FCT"))$data)
           FCKeep <- FCfields %>% dplyr::filter(grepl("min_*", form_name)==T) %>% dplyr::select(field_name)
           FCData <- FCData %>% dplyr::select(dplyr::one_of("assay_material_id", "redcap_data_access_group", FCKeep$field_name))
           }
     }
     if (domain %in% c("all", "molecular")) {
-        MHData <- REDCapR::redcap_read_oneshot(
+        MHData <- suppressMessages(
+          REDCapR::redcap_read_oneshot(
           Sys.getenv("REDURI"), Sys.getenv("MHT"),
           export_data_access_groups = T)$data %>%
-          dplyr::select(-dplyr::ends_with("_complete"))
+          dplyr::select(-dplyr::ends_with("_complete")))
 
         if (harmonizedOnly == TRUE) {
-          MHfields <- REDCapR::redcap_metadata_read(Sys.getenv("REDURI"), Sys.getenv("MHT"))$data
+          MHfields <- suppressMessages(
+            REDCapR::redcap_metadata_read(Sys.getenv("REDURI"), Sys.getenv("MHT"))$data)
           MHKeep <- MHfields %>% dplyr::filter(grepl("min_*", form_name)==T | grepl("data_is*", field_name) == T) %>% dplyr::select(field_name)
           MHData <- MHData %>% dplyr::select(dplyr::one_of("molecular_id", "redcap_data_access_group", MHKeep$field_name))
           }
@@ -58,10 +66,12 @@ redcapPull <- function(domain = "all", harmonizedOnly = FALSE, evenEmptyCols = F
     if (missing(DAG)) {print("Returning all data you have access to.")
     } else {
         if (DAG == "all") {print("Returning all data you have access to.")
+          print(paste0("DAGs returned: ", paste(unique(results$redcap_data_access_group), collapse = ", ")))
         } else {
           if (DAG %in% results$redcap_data_access_group){
             results <- results %>% dplyr::filter(redcap_data_access_group == DAG)
-          } else {print("Invalid DAG or you do not have permissions.")}
+            print(paste0("DAGs returned: ", paste(unique(results$redcap_data_access_group), collapse = ", ")))
+          } else {stop("Invalid DAG or you do not have permissions.")}
         }
     }
     if (evenEmptyCols == F) {

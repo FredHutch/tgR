@@ -10,7 +10,7 @@
 #' @export
 listS3Objects <- function(bucket) {
   if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
-    print("You have missing environment variables.  Please setCreds().")
+    stop("You have missing environment variables.  Please setCreds().")
     } else print("Credentials set successfully.")
   if(Sys.getenv("AWS_ACCESS_KEY_ID") == "") {
     Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
@@ -42,7 +42,7 @@ listS3Objects <- function(bucket) {
 #' @export
 summarizeS3Objects <- function(bucket) {
   if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
-    print("You have missing environment variables.  Please setCreds().")
+    stop("You have missing environment variables.  Please setCreds().")
     } else print("Credentials set successfully.")
   if(Sys.getenv("AWS_ACCESS_KEY_ID") == "") {
   Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),

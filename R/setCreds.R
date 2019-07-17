@@ -30,5 +30,5 @@ setCreds <- function(tokenSet="file", path) {
              AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
              AWS_DEFAULT_REGION = "us-west-2")
   if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
-    print("You have missing environment variables.  Please set env vars.")} else print("Credentials set successfully.")
+    stop("You have missing environment variables.  Please set env vars.")} else print("Credentials set successfully.")
 }

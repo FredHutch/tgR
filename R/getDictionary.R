@@ -9,7 +9,8 @@
 #' @export
 getDictionary <- function(project) {
   if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
-    print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
+    stop("You have missing environment variables.  Please set creds in env vars.")}
+  else print("Credentials set successfully.")
   if (project == "specimen") {
     result <- jsonlite::fromJSON(RCurl::postForm(
       uri=Sys.getenv("REDURI"),
