@@ -4,12 +4,12 @@
 \alias{setCreds}
 \title{Sets tgR environment variables}
 \usage{
-setCreds(tokenSet = "file", path)
+setCreds(path, tokenSet = "file")
 }
 \arguments{
-\item{tokenSet}{Which token set to apply, default is "file", and then a path to a credentials file is required.  Other options include "admin" or "app".}
+\item{path}{The path to the file to source that contains appropriately defined environment variables (see requiredCredentials.R for an example).}
 
-\item{path}{The path to the file to source that contains appropriately defined environment variables.}
+\item{tokenSet}{Which token set to apply, default is "file", and then a path to a credentials file is required.  Other options include "admin" or "app".}
 }
 \value{
 Nothing, sets environment variables for the remaining functions to work.

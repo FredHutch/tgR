@@ -16,15 +16,15 @@ dropWhen(df, unique = FALSE, trash = NULL, requireAll = TRUE)
 \item{requireAll}{Boolean as to whether you want to require all rows in a column to equal a value in `trash` before filtering the column out (TRUE).}
 }
 \value{
-Returns a columnn filtered data frame
+Returns a columnn filtered data frame.  Note, does not take into account numeric, integer or character value differences (it will treat them all the same).
 }
 \description{
 Remove columns with specific trash
 }
 \examples{
 df <- data.frame(this = c(NA, seq(1, 5, 1), seq(1, 5, 1)), that = rep(0, 11),
-thisotherThing = rep(NA), ohAndThis = rep(c("junk", "0"), 11))
-cleanerdf <- dropWhen(df, unique = FALSE, trash = c("0", "junk"), requireAll = FALSE)
+thisotherThing = rep(NA), ohAndThis = rep(c("trash", "0"), 11))
+cleanerdf <- dropWhen(df, unique = FALSE, trash = c("0", "trash"), requireAll = FALSE)
 }
 \author{
 Amy Paguirigan

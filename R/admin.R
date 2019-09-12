@@ -1,50 +1,38 @@
-#' Test if identifiers have already been used in the TGR.
-#'
+#' Test if proposed identifiers have already been used in the TGR.
+#' @description Test if proposed identifiers have already been used in the TGR, or in your data access group specifically.
+#' You must provide an array of identifiers you'd like to use, specify what type of identifier it is, and also whether you want
+#' to test if the identifiers are unique in the entire repository (such as for molecular_id),
+#' or just unique to your data access group (such as subject_id, biospecimen_id, assay_material_id).
+#' The function will return identifiers in your list that are valid for use.
+#' FYI:  Querying over the entire repository will require admin credentials.
 #' @param x Character vector of proposed identifiers.
-#' @param type Identifier type: `biospecimen_id`, `assay_material_id`, or `molecular_id`.
-#' @return Returns the list of idnetifiers that have already been used.
+#' @param type Identifier type to query, choose one of: `subject_id`,`biospecimen_id`, `assay_material_id`, or `molecular_id`.
+#' @param DAG Data access group to query for uniqueness.  Do not supply DAG to test for uniqueness across the entire Repository. If you do not have admin credentials you MUST provide a DAG.
+#' @return Returns any identifiers supplied that are NOT used or are valid for use.
 #' @author Amy Paguirigan
 #' @details
-#' Requires **admin** REDCap credentials to be set in the environment.
+#' Some conditions may require **admin** REDCap credentials to be set in the environment.
 #' @export
-usedIdentifiers <- function(x, type) {
-  if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
+usedIdentifiers <- function(x, type, DAG = NULL) {
+  if ("" %in% Sys.getenv(c("REDURI", "S3A", "S3SA", "TGR"))) {
     stop("You have missing environment variables.  Please set creds in env vars.")}
-  else print("Credentials set successfully.")
+  else message("Credentials set successfully.")
 
-  if (type == "biospecimen_id") {
-    IDs <- suppressMessages(REDCapR::redcap_read_oneshot(
-      Sys.getenv("REDURI"), Sys.getenv("INT"),
-      records = x, fields = type)$data)
+  if (is.null(DAG) == TRUE) {
+    usedIDs <- suppressMessages(REDCapR::redcap_read_oneshot(
+      Sys.getenv("REDURI"), Sys.getenv("TGR"),
+      records = x, fields = type,
+      export_data_access_groups = TRUE)$data)
+    validIDs <- x[!x %in% usedIDs[,1]]
   }
-  if (type == "assay_material_id") {
-    IDs <- suppressMessages(REDCapR::redcap_read_oneshot(
-      Sys.getenv("REDURI"), Sys.getenv("FCT"),
-      records = x, fields = type)$data)
+  if (is.null(DAG) == FALSE) {
+    usedIDs <- suppressMessages(REDCapR::redcap_read_oneshot(
+      Sys.getenv("REDURI"), Sys.getenv("TGR"),
+      records = x, fields = type,
+      export_data_access_groups = TRUE)$data)
+    thisDAG <- usedIDs %>% filter(redcap_data_access_group == DAG)
+    validIDs <- x[!x %in% thisDAG[,1]]
   }
-  if (type == "molecular_id") {
-    IDs <- suppressMessages(REDCapR::redcap_read_oneshot(
-      Sys.getenv("REDURI"), Sys.getenv("MHT"),
-      records = x, fields = type)$data)
-  }
-  return(IDs)
+  return(validIDs)
 }
-#' Create a snapshot of the Annotation Dictionary (not needed anymore)
-#'
-#' Pulls sample data down from REDCap in order to generate example column lists for use in Shiny UI's.
-#'
-#' @param commonKnowledge The commonKnowledge data frame containing current annotations via pullAnnotations().
-#' @return A character vector containing the `categorical` annotations in the TGR.
-#' @author Amy Paguirigan
-#' @details
-#' Requires **admin** REDCap credentials to be set in the environment.
-annotationDictionary <- function(commonKnowledge) {
-  if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
-    print("You have missing environment variables.  Please set creds in env vars.")} else print("Credentials set successfully.")
-  print("annotationDictionary(); setup for Shiny UI")
-  # only display annotations in the Shiny app if they have been defined in commonKnowledge
-  categorical <- unique(commonKnowledge[commonKnowledge$Type == "categorical",]$Annotation)
-  return(categorical)
-}
-
 

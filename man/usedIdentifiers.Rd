@@ -2,23 +2,30 @@
 % Please edit documentation in R/admin.R
 \name{usedIdentifiers}
 \alias{usedIdentifiers}
-\title{Test if identifiers have already been used in the TGR.}
+\title{Test if proposed identifiers have already been used in the TGR.}
 \usage{
-usedIdentifiers(x, type)
+usedIdentifiers(x, type, DAG = NULL)
 }
 \arguments{
 \item{x}{Character vector of proposed identifiers.}
 
-\item{type}{Identifier type: `biospecimen_id`, `assay_material_id`, or `molecular_id`.}
+\item{type}{Identifier type to query, choose one of: `subject_id`,`biospecimen_id`, `assay_material_id`, or `molecular_id`.}
+
+\item{DAG}{Data access group to query for uniqueness.  Do not supply DAG to test for uniqueness across the entire Repository. If you do not have admin credentials you MUST provide a DAG.}
 }
 \value{
-Returns the list of idnetifiers that have already been used.
+Returns any identifiers supplied that are NOT used or are valid for use.
 }
 \description{
-Test if identifiers have already been used in the TGR.
+Test if proposed identifiers have already been used in the TGR, or in your data access group specifically.
+You must provide an array of identifiers you'd like to use, specify what type of identifier it is, and also whether you want
+to test if the identifiers are unique in the entire repository (such as for molecular_id),
+or just unique to your data access group (such as subject_id, biospecimen_id, assay_material_id).
+The function will return identifiers in your list that are valid for use.
+FYI:  Querying over the entire repository will require admin credentials.
 }
 \details{
-Requires **admin** REDCap credentials to be set in the environment.
+Some conditions may require **admin** REDCap credentials to be set in the environment.
 }
 \author{
 Amy Paguirigan

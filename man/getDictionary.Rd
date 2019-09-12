@@ -2,18 +2,15 @@
 % Please edit documentation in R/getDictionary.R
 \name{getDictionary}
 \alias{getDictionary}
-\title{Retrieve an example data dictionary from the TGR REDCap projects}
+\title{Retrieve an example data dictionary from the TGR REDCap project}
 \usage{
-getDictionary(project)
-}
-\arguments{
-\item{project}{A string for which REDCap project to return data dictionary for, such as "specimen", "assay", or "molecular".}
+getDictionary()
 }
 \value{
 An array of field names for the project specified.
 }
 \description{
-Retrieve an example data dictionary from the TGR REDCap projects
+Retrieve an example data dictionary from the TGR REDCap project
 }
 \details{
 Requires REDCap credentials to be set in the environment.
