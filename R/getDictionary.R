@@ -4,7 +4,7 @@
 #' @return An array of field names for the project specified.
 #' @author Amy Paguirigan
 #' @details
-#' Requires REDCap credentials to be set in the environment.
+#' Requires setCreds() to have been run successfully.
 #' @export
 getDictionary <- function() {
   if ("" %in% Sys.getenv(c("REDURI", "TGR", "S3A", "S3SA"))) {

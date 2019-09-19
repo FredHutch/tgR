@@ -8,3 +8,5 @@
 \.Rbuildignore
 
 R/\.Rapp\.history
+
+test.R

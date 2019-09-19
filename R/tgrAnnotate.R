@@ -6,7 +6,7 @@
 #' @return Returns a long form data frame containing the requested dataset.
 #' @author Amy Paguirigan
 #' @details
-#' Requires REDCap credentials to be set in the environment.  Was redcapPULL
+#' Requires setCreds() to have been run successfully.
 #' @export
 tgrAnnotate <- function(DAG, harmonizedOnly = FALSE, evenEmptyCols = FALSE) {
   if ("" %in% Sys.getenv(c("REDURI", "TGR"))) {

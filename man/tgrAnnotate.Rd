@@ -20,7 +20,7 @@ Returns a long form data frame containing the requested dataset.
 Queries TGR REDCap for dataset annotations
 }
 \details{
-Requires REDCap credentials to be set in the environment.  Was redcapPULL
+Requires setCreds() to have been run successfully.
 }
 \author{
 Amy Paguirigan

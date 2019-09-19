@@ -13,7 +13,7 @@ An array of field names for the project specified.
 Retrieve an example data dictionary from the TGR REDCap project
 }
 \details{
-Requires REDCap credentials to be set in the environment.
+Requires setCreds() to have been run successfully.
 }
 \author{
 Amy Paguirigan
