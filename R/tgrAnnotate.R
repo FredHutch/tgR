@@ -13,9 +13,9 @@ tgrAnnotate <- function(DAG, harmonizedOnly = FALSE, evenEmptyCols = FALSE) {
     stop("You have missing environment variables.  Please setCreds().")}
   else message("Credentials set successfully.")
         tgrData <- suppressMessages(
-          REDCapR::redcap_read_oneshot(
+          a<- REDCapR::redcap_read_oneshot(
           Sys.getenv("REDURI"), Sys.getenv("TGR"),
-          export_data_access_groups = T)$data %>%
+          export_data_access_groups = T, guess_type = F)$data %>%
           dplyr::select(-dplyr::ends_with("_complete")))
 
         if (harmonizedOnly == TRUE) {
