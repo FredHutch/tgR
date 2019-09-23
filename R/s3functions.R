@@ -11,13 +11,13 @@
 listS3Objects <- function(bucket) {
   if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
     stop("You have missing environment variables.  Please setCreds().")
-    } else print("Credentials set successfully.")
+    } else message("Credentials set successfully.")
   if(Sys.getenv("AWS_ACCESS_KEY_ID") == "") {
     Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
                AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
                AWS_DEFAULT_REGION = "us-west-2")} # only set them if they are unset
 
-    print("Pulling S3 tag list(s).")
+    message("Pulling S3 tag list(s).")
     if (bucket == "fh-pi-paguirigan-a-genomicsrepo") {
       keys <- aws.s3::get_bucket_df(bucket = bucket,
                                     prefix = "apptags/meta/")$Key
@@ -43,13 +43,13 @@ listS3Objects <- function(bucket) {
 summarizeS3Objects <- function(bucket) {
   if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
     stop("You have missing environment variables.  Please setCreds().")
-    } else print("Credentials set successfully.")
+    } else message("Credentials set successfully.")
   if(Sys.getenv("AWS_ACCESS_KEY_ID") == "") {
   Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
              AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
              AWS_DEFAULT_REGION = "us-west-2")}
 
-  print("Pulling S3 object summary.")
+  message("Pulling S3 object summary.")
 
   if (bucket == "fh-pi-paguirigan-a-genomicsrepo") {
     keys <- aws.s3::get_bucket_df(bucket = bucket, prefix = "apptags/summary/")$Key
@@ -62,7 +62,7 @@ summarizeS3Objects <- function(bucket) {
                          bucket = bucket)})
   return(s3summary)
 }
-#' Copy and tag objects between S3 buckets
+#' (admin) Copy and tag objects between S3 buckets
 #'
 #' Copies and tags objects in an S3 bucket from another S3 bucket.
 #'
@@ -74,7 +74,7 @@ summarizeS3Objects <- function(bucket) {
 #' @return TBD
 #' @author Amy Paguirigan
 #' @details
-#' Requires valid S3 credentials to be set in the environment by setCreds and the likely the output from cromwellOutput()
+#' Requires valid admin S3 credentials to be set in the environment by setCreds and the likely the output from cromwellOutput()
 #' @export
 s3_copy_and_tag <- function(fromBucket, fromPrefix, toBucket, toPrefix, tagList) {
   if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
@@ -100,15 +100,15 @@ s3_copy_and_tag <- function(fromBucket, fromPrefix, toBucket, toPrefix, tagList)
   }
 }
 
-#' Prep a data frame for s3_copy_and_tag()
+#' (admin) Prep a data frame for s3_copy_and_tag()
 #'
 #' Creates a list of tibbles for each row of the provided data frame such that the data can then be used to pass arguments to s3_copy_and_tag
 #'
 #' @param thisDataFrameofMine A data frame containing the columns: "molecular_id", "s3Prefix", "s3Bucket", "s3DestinationPrefix", "s3DestinationBucket" as well as any tags desired as additional columns.
-#' @return A list of tibbles ready for s3_copy_and_tag
+#' @return A list of lists ready for s3_copy_and_tag
 #' @author Amy Paguirigan
 #' @details
-#' Requires valid S3 credentials to be set in the environment by setCreds and the likely the output from cromwellOutput()
+#' Requires valid admin S3 credentials to be set in the environment by setCreds and the likely the output from cromwellOutput()
 #' @export
 prep_s3_copy_and_tag <- function(thisDataFrameofMine){
   if (is.data.frame(thisDataFrameofMine)==T){

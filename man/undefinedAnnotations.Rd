@@ -2,12 +2,12 @@
 % Please edit documentation in R/annotationfunctions.R
 \name{undefinedAnnotations}
 \alias{undefinedAnnotations}
-\title{Finds undefined REDCap variables}
+\title{(Admin) Finds undefined REDCap variables}
 \usage{
 undefinedAnnotations()
 }
 \value{
-A data frame of makeMeaning.  This is a template to add to the commonKnowledge dataframe with new definitions or corrections.
+A data frame that is a template to add to the commonKnowledge data in the tgr-annotations repo with new definitions or corrections.
 }
 \description{
 Pulls sample data down from REDCap and compares them with the defined annotation list in GitHub and identifies variables in REDCap that need defining in GitHub.  Only variables for which there is a value in at least one record are returned.

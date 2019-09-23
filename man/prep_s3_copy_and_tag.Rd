@@ -2,7 +2,7 @@
 % Please edit documentation in R/s3functions.R
 \name{prep_s3_copy_and_tag}
 \alias{prep_s3_copy_and_tag}
-\title{Prep a data frame for s3_copy_and_tag()}
+\title{(admin) Prep a data frame for s3_copy_and_tag()}
 \usage{
 prep_s3_copy_and_tag(thisDataFrameofMine)
 }
@@ -10,13 +10,13 @@ prep_s3_copy_and_tag(thisDataFrameofMine)
 \item{thisDataFrameofMine}{A data frame containing the columns: "molecular_id", "s3Prefix", "s3Bucket", "s3DestinationPrefix", "s3DestinationBucket" as well as any tags desired as additional columns.}
 }
 \value{
-A list of tibbles ready for s3_copy_and_tag
+A list of lists ready for s3_copy_and_tag
 }
 \description{
 Creates a list of tibbles for each row of the provided data frame such that the data can then be used to pass arguments to s3_copy_and_tag
 }
 \details{
-Requires valid S3 credentials to be set in the environment by setCreds and the likely the output from cromwellOutput()
+Requires valid admin S3 credentials to be set in the environment by setCreds and the likely the output from cromwellOutput()
 }
 \author{
 Amy Paguirigan

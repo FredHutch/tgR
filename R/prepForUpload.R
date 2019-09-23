@@ -1,53 +1,30 @@
-#' Separate a data frame by TGR REDCap Project for upload
+#' Validate a data frame for upload to TGR
 #'
-#'
-#'
-#' @param fileStem A character vector that you want the resulting csv's to have as the beginning of the filenames.
-#' @param dataToSplit A data frame WITHOUT rownames, containing the data you want to split and upload. Note:  For a valid dataset to be uploaded to REDCap, any relevant Repository identifier needs to be included in the data frame.
-#' @return Writes up to 3 csv's ready for upload into the individual REDCap Projects of the TGR to the working directory.
+#' @param dataToValidate A data frame containing the data you want to validate for upload.
+#' Note:  For a valid dataset to be uploaded to the TGR REDCap, it must have the `molecular_id` column first.
+#' @return A list of results including: `assessment` which is the results from REDCapR's `validate_for_write` function;
+#' `invalid` which is a data frame including `molecular_id` that includes columns that are not included in the TGR data dictionary and cannot be uploaded;
+#' and `valid` which is a data frame suitable for uploading via the Data Import Tool in REDCap after writing it to a csv.
 #' @author Amy Paguirigan
 #' @details
 #' Requires REDCap credentials to be set in the environment.  Does not allow for changes in DAG or marking if an instrument is complete.
 #' @export
-prepForUpload <- function(fileStem, dataToSplit) {
-  if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT"))) {
+validateUpload <- function(dataToValidate) {
+  if ("" %in% Sys.getenv(c("REDURI", "TGR"))) {
     stop("You have missing environment variables.  Please use setCreds().")}
-  else print("Credentials set successfully.")
-  if (is.character(fileStem) & length(fileStem) == 1) {
-    if (is.data.frame(dataToSplit) & nrow(dataToSplit) > 0) {
-
-      specimen <- dataToSplit[colnames(dataToSplit) %in% getDictionary(project = "specimen")]
-      specimen <- specimen %>% unique() %>% dplyr::filter(biospecimen_id != "")
-      if(ncol(specimen) > 0) {
-        if ("biospecimen_id" %in% colnames(specimen)){
-          specimen <- specimen %>% dplyr::select("biospecimen_id", dplyr::everything())
-          write.csv(specimen, file = paste0(fileStem, "-TGBiospecimens.csv"), row.names = F, na = "")
-          print(paste0("Writing File: ", paste0(fileStem, "-TGBiospecimens.csv")))
-        } else { stop("biospecimen_id is required for this upload.")}
-      }
-
-      assay <- dataToSplit[colnames(dataToSplit) %in% getDictionary(project = "assay")]
-      assay <- assay %>% unique() %>% dplyr::filter(assay_material_id != "")
-      if(ncol(assay) > 0) {
-        if ("assay_material_id" %in% colnames(assay)){
-          assay <- assay %>% dplyr::select("assay_material_id", "biospecimen_id", dplyr::everything())
-          write.csv(assay, file = paste0(fileStem, "-TGAssayMaterials.csv"), row.names = F, na = "")
-          print(paste0("Writing File: ", paste0(fileStem, "-TGAssayMaterials.csv")))
-        } else { stop("assay_material_id is required for this upload.")}
-      }
-
-      molecular <- dataToSplit[colnames(dataToSplit) %in% getDictionary(project = "molecular")]
-      molecular <- molecular %>% unique() %>% dplyr::filter(molecular_id != "")
-      if(ncol(molecular) > 0) {
-        if ("molecular_id" %in% colnames(molecular)){
-          molecular <- molecular %>% dplyr::select("molecular_id", "assay_material_id", dplyr::everything())
-          write.csv(molecular, file = paste0(fileStem, "-TGMolecularDatasets.csv"), row.names = F, na = "")
-          print(paste0("Writing File: ", paste0(fileStem, "-TGMolecularDatasets.csv")))
-        } else { stop("molecular_id is required for this upload.")}
-      }
-
-    } else {stop("Please provide a data frame with more than 0 rows to split for uploading.")}
-  } else {stop("Please provide a single `fileStem` character string for your files.")}
-
+  else message("Credentials set successfully.")
+    if (is.data.frame(dataToValidate) == T) {
+      if (nrow(dataToValidate) > 0 ){
+        if ("molecular_id" %in% colnames(dataToValidate) == T) {
+      assessment <- REDCapR::validate_for_write(dataToValidate) # return whatever this gives you, possibly useless
+      allcolumns <- suppressMessages(getDictionary())
+      nonRequiredCols <- allcolumns[!allcolumns %in% c("molecular_id")]
+      invalid <- dataToValidate[!colnames(dataToValidate) %in% nonRequiredCols] # return columns that are named wrong
+      valid <- dataToValidate[colnames(dataToValidate) %in% allcolumns] # return columns that are named correctly
+      results <- list(assessment = assessment, invalid = invalid, valid = valid)
+        } else {stop("Please provide a data frame with the column `molecular_id` to validate.")}
+      }  else {stop("Please provide a data frame with more than 0 rows to validate.")}
+    } else {stop("Please provide a data frame to validate.")}
+return(results)
 }
 

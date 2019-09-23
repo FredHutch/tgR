@@ -2,7 +2,7 @@
 % Please edit documentation in R/s3functions.R
 \name{s3_copy_and_tag}
 \alias{s3_copy_and_tag}
-\title{Copy and tag objects between S3 buckets}
+\title{(admin) Copy and tag objects between S3 buckets}
 \usage{
 s3_copy_and_tag(fromBucket, fromPrefix, toBucket, toPrefix, tagList)
 }
@@ -24,7 +24,7 @@ TBD
 Copies and tags objects in an S3 bucket from another S3 bucket.
 }
 \details{
-Requires valid S3 credentials to be set in the environment by setCreds and the likely the output from cromwellOutput()
+Requires valid admin S3 credentials to be set in the environment by setCreds and the likely the output from cromwellOutput()
 }
 \author{
 Amy Paguirigan

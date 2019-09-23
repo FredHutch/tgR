@@ -1,37 +1,35 @@
-#' Pull Current TGR Annotation definitions
+#' Pull Current TGR Annotation and Value definitions
 #'
-#' Pulls current data about annotations from GitHub for use in annotating molecular data sets in the Repository.
-#'
+#' @description Pulls current data about annotations from GitHub for use in annotating molecular data sets in the Repository.
 #' @return A data frame containing the current TGR Annotations, Values and their Definitions
 #' @author Amy Paguirigan
+#' @return Returns a data frame containing TGR metadata definitions.
 #' @details
 #' Nothing to see here.
 #' @export
-
-pullAnnotations <- function() {
-  print("pulling annotations from the master branch of the tgr-annotations repo")
+tgrDefinitions <- function() {
+  message("pulling annotations from the master branch of the tgr-annotations repo")
   suppressMessages(commonKnowledge <- httr::content(httr::GET("https://raw.github.com/FredHutch/tgr-annotations/master/commonKnowledge.csv"),
                                    as = "parsed", type = "text/csv"))
   return(commonKnowledge)
 }
-#' Finds undefined REDCap variables
+
+
+#' (Admin) Finds undefined REDCap variables
 #'
 #' Pulls sample data down from REDCap and compares them with the defined annotation list in GitHub and identifies variables in REDCap that need defining in GitHub.  Only variables for which there is a value in at least one record are returned.
 #'
-#' @return A data frame of makeMeaning.  This is a template to add to the commonKnowledge dataframe with new definitions or corrections.
+#' @return A data frame that is a template to add to the commonKnowledge data in the tgr-annotations repo with new definitions or corrections.
 #' @author Amy Paguirigan
 #' @details
 #' Requires **admin** REDCap credentials to be set in the environment.
 #' @export
 undefinedAnnotations <- function() {
-  if ("" %in% Sys.getenv(c("REDURI", "INT", "FCT", "MHT", "S3A", "S3SA"))) {
+  if ("" %in% Sys.getenv(c("REDURI", "TGR", "S3A", "S3SA"))) {
     stop("You have missing environment variables.  Please set creds in env vars.")}
-  else print("Credentials set successfully.")
-
-  print("Get current annotation definitions.")
-  commonKnowledge <- pullAnnotations()
-  print("Get all data from REDCap for variables intended to be harmonized.")
-  sciMeta <- redcapPull(harmonizedOnly = T, DAG = "all", evenEmptyCols = F)
+  else message("Credentials set successfully.")
+  commonKnowledge <- tgrDefinitions()
+  sciMeta <- tgrAnnotate(harmonizedOnly = T, DAG = "all", evenEmptyCols = F)
   # Remove project memberships
   defineMe <- sciMeta %>% dplyr::select(-dplyr::starts_with("data_is_"))
   categorical <- commonKnowledge %>% dplyr::filter(Type == "categorical")
@@ -57,3 +55,4 @@ undefinedAnnotations <- function() {
 
   return(makeMeaning)
 }
+
