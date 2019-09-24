@@ -28,6 +28,7 @@ validateDataset <- function(validation_id = NULL){
     tobeValidated <- tgrData %>% dplyr::select(-c("ext_biospecimen_id", "biospecimen_id", "assay_material_id", "molecular_id"))
     badrecords <- tobeValidated %>% dplyr::group_by(subject_id) %>% dplyr::distinct()%>% dplyr::filter(dplyr::n()>1)
     misMatches <- tgrData %>% dplyr::filter(subject_id %in% badrecords$subject_id) %>% dropWhen()
+    misMatches <- dplyr::arrange(misMatches, subject_id)
   } else if (validation_id == "biospecimen_id"){
     fieldstoPull <- forms[forms$form_name %in% c("tgr_entry_ids", "tgr_ids","tgr_specimen_acquisition", "biomarkersleukemia"),]$field_name
     tgrData <- suppressMessages(
@@ -41,6 +42,7 @@ validateDataset <- function(validation_id = NULL){
 
     badrecords <- tobeValidated %>% dplyr::group_by(biospecimen_id) %>% dplyr::distinct() %>% dplyr::filter(dplyr::n()>1)
     misMatches <- tgrData %>% dplyr::filter(biospecimen_id %in% badrecords$biospecimen_id) %>% dropWhen()
+    misMatches <- dplyr::arrange(misMatches, biospecimen_id)
   } else if (validation_id == "assay_material_id"){
     fieldstoPull <- forms[forms$form_name %in% c("tgr_entry_ids", "tgr_ids","tgr_laboratory"),]$field_name
     tgrData <- suppressMessages(
@@ -53,6 +55,7 @@ validateDataset <- function(validation_id = NULL){
     tobeValidated <- tgrData %>% dplyr::select(-c("subject_id", "biospecimen_id", "ext_biospecimen_id", "molecular_id"))
     badrecords <- tobeValidated %>% dplyr::group_by(assay_material_id) %>% dplyr::distinct() %>% dplyr::filter(dplyr::n()>1)
     misMatches <- tgrData %>% dplyr::filter(assay_material_id %in% badrecords$assay_material_id) %>% dropWhen()
+    misMatches <- dplyr::arrange(misMatches, assay_material_id)
   } else (message("Please choose an id by which to validate your dataset:  subject_id, biospecimen_id, or assay_material_id."))
   return(misMatches)
 }
