@@ -22,7 +22,7 @@ validateDataset <- function(validation_id = NULL){
       REDCapR::redcap_read_oneshot(
         Sys.getenv("REDURI"), Sys.getenv("TGR"),
         export_data_access_groups = T,
-        fields = fieldstoPull)$data %>%
+        fields = fieldstoPull, guess_type = F)$data %>%
         dplyr::select(-dplyr::ends_with("_complete")))
     tgrData[tgrData == ""] <- NA
     tobeValidated <- tgrData %>% dplyr::select(-c("ext_biospecimen_id", "biospecimen_id", "assay_material_id", "molecular_id"))
@@ -34,7 +34,7 @@ validateDataset <- function(validation_id = NULL){
       REDCapR::redcap_read_oneshot(
         Sys.getenv("REDURI"), Sys.getenv("TGR"),
         export_data_access_groups = T,
-        fields = fieldstoPull)$data %>%
+        fields = fieldstoPull, guess_type = F)$data %>%
         dplyr::select(-dplyr::ends_with("_complete")))
     tgrData[tgrData == ""] <- NA
     tobeValidated <- tgrData %>% dplyr::select(-c("subject_id", "assay_material_id", "molecular_id"))
@@ -47,7 +47,7 @@ validateDataset <- function(validation_id = NULL){
       REDCapR::redcap_read_oneshot(
         Sys.getenv("REDURI"), Sys.getenv("TGR"),
         export_data_access_groups = T,
-        fields = fieldstoPull)$data %>%
+        fields = fieldstoPull, guess_type = F)$data %>%
         dplyr::select(-dplyr::ends_with("_complete")))
     tgrData[tgrData == ""] <- NA
     tobeValidated <- tgrData %>% dplyr::select(-c("subject_id", "biospecimen_id", "ext_biospecimen_id", "molecular_id"))

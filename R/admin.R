@@ -22,14 +22,14 @@ usedIdentifiers <- function(x, type, DAG = NULL) {
     usedIDs <- suppressMessages(REDCapR::redcap_read_oneshot(
       Sys.getenv("REDURI"), Sys.getenv("TGR"),
       records = x, fields = type,
-      export_data_access_groups = TRUE)$data)
+      export_data_access_groups = TRUE, guess_type = F)$data)
     validIDs <- x[!x %in% usedIDs[,1]]
   }
   if (is.null(DAG) == FALSE) {
     usedIDs <- suppressMessages(REDCapR::redcap_read_oneshot(
       Sys.getenv("REDURI"), Sys.getenv("TGR"),
       records = x, fields = type,
-      export_data_access_groups = TRUE)$data)
+      export_data_access_groups = TRUE, guess_type = F)$data)
     thisDAG <- usedIDs %>% filter(redcap_data_access_group == DAG)
     validIDs <- x[!x %in% thisDAG[,1]]
   }
