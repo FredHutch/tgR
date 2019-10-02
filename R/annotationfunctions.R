@@ -29,7 +29,7 @@ undefinedAnnotations <- function() {
     stop("You have missing environment variables.  Please set creds in env vars.")}
   else message("Credentials set successfully.")
   commonKnowledge <- tgrDefinitions()
-  sciMeta <- tgrAnnotate(harmonizedOnly = T, DAG = "all", evenEmptyCols = F)
+  sciMeta <- tgrAnnotate(harmonizedOnly = T, DAG = "all", evenEmptyCols = T)
   # Remove project memberships
   defineMe <- sciMeta %>% dplyr::select(-dplyr::starts_with("data_is_"))
   categorical <- commonKnowledge %>% dplyr::filter(Type == "categorical")
@@ -54,5 +54,25 @@ undefinedAnnotations <- function() {
   suppressWarnings(makeMeaning <- dplyr::bind_rows(commonKnowledge[0,], makeMeaning)) # make a sample data frame to fill in
 
   return(makeMeaning)
+}
+
+#' (Admin) Finds unused REDCap variables
+#'
+#' Pulls sample data down from REDCap and compares them with the defined annotation list in GitHub and identifies variables previously used in REDCap that have definitions in GitHub that need to be removed.
+#'
+#' @return A data frame that is list in the format of commonKnowledge data in the tgr-annotations repo with annotations and values to remove.
+#' @author Amy Paguirigan
+#' @details
+#' Requires **admin** REDCap credentials to be set in the environment.
+#' @export
+unusedAnnotations <- function() {
+  if ("" %in% Sys.getenv(c("REDURI", "TGR", "S3A", "S3SA"))) {
+    stop("You have missing environment variables.  Please set creds in env vars.")}
+  else message("Credentials set successfully.")
+  commonKnowledge <- tgrDefinitions()
+  sciMeta <- tgrAnnotate(harmonizedOnly = F, DAG = "all", evenEmptyCols = T)
+  unused <- commonKnowledge %>% dplyr::filter(!Annotation %in% colnames(sciMeta)) %>% dplyr::filter(Category != "Bioinformatics")
+
+  return(unused)
 }
 
