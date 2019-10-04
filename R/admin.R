@@ -13,7 +13,7 @@
 #' @details
 #' Some conditions may require **admin** REDCap credentials to be set in the environment.
 #' @export
-usedIdentifiers <- function(x, type, DAG = NULL) {
+validIdentifiers <- function(x, type, DAG = NULL) {
   if ("" %in% Sys.getenv(c("REDURI", "S3A", "S3SA", "TGR"))) {
     stop("You have missing environment variables.  Please set creds in env vars.")}
   else message("Credentials set successfully.")
@@ -23,7 +23,7 @@ usedIdentifiers <- function(x, type, DAG = NULL) {
       Sys.getenv("REDURI"), Sys.getenv("TGR"),
       records = x, fields = type,
       export_data_access_groups = TRUE, guess_type = F)$data)
-    validIDs <- x[!x %in% usedIDs[,1]]
+    if(ncol(usedIDs)>0) {validIDs <- as.character(x[!x %in% usedIDs[,1]])} else validIDs<-as.character(x)
   }
   if (is.null(DAG) == FALSE) {
     usedIDs <- suppressMessages(REDCapR::redcap_read_oneshot(
@@ -31,8 +31,9 @@ usedIdentifiers <- function(x, type, DAG = NULL) {
       records = x, fields = type,
       export_data_access_groups = TRUE, guess_type = F)$data)
     thisDAG <- usedIDs %>% filter(redcap_data_access_group == DAG)
-    validIDs <- x[!x %in% thisDAG[,1]]
+    if(ncol(thisDAG)>0) {validIDs <- as.character(x[!x %in% thisDAG[,1]])} else validIDs<-as.character(x)
   }
+
   return(validIDs)
 }
 
