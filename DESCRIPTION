@@ -1,7 +1,7 @@
 Package: tgR
 Type: Package
 Title: TGR Convenience Functions
-Version: 0.1.0
+Version: 0.3.1
 Author: Amy Paguirigan
 Maintainer: Amy Paguirigan <apaguiri@fredhutch.org>
 Description: This package provides helper functions needed to coordinate between various aspects of repository.
