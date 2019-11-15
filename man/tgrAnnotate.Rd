@@ -4,14 +4,15 @@
 \alias{tgrAnnotate}
 \title{Queries TGR REDCap for dataset annotations}
 \usage{
-tgrAnnotate(DAG, harmonizedOnly = FALSE, evenEmptyCols = FALSE)
+tgrAnnotate(DAG = NULL, harmonizedOnly = FALSE,
+  evenEmptyCols = FALSE)
 }
 \arguments{
-\item{DAG}{(Optional) A character vector contining the name(s) of the dtgrata access group(s) for which to request data, or "all" (parameter applies to admin only).}
+\item{DAG}{(admin only) A character vector contining the name(s) of the TGR data access group(s) for which to request data, or "all".}
 
-\item{harmonizedOnly}{Whether you want only the annotations that are harmonized across all projects (TRUE) or a complete data set (FALSE).}
+\item{harmonizedOnly}{(Optional) Whether you want only the annotations that are harmonized across all projects (TRUE) or a complete data set (FALSE, default).}
 
-\item{evenEmptyCols}{Whether you want even the empty fields in your final data frame (TRUE) or if you just want columns where there is at least one value in the resulting dataset (FALSE).}
+\item{evenEmptyCols}{(Optional) Whether you want even the empty fields in your final data frame (TRUE) or if you just want columns where there is at least one value in the resulting dataset (FALSE, default).}
 }
 \value{
 Returns a long form data frame containing the requested dataset.
