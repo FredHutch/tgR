@@ -15,9 +15,9 @@ dropWhen <- function(df, unique = FALSE, trash=NULL, requireAll = TRUE, except =
   # Add atemporary index column so in case there are non-unique rows in the original df, the join doesn't break.
   df$dropIndex <- seq(1:nrow(df))
   # save a copy of the index and the extra columns for future re-application, but not the entire thing for memory purposes
-  extraColumns <- df %>% select(c(dropIndex, except))
+  extraColumns <- df[colnames(df) %in% c("dropIndex", except)]
   if(is.null(except)==F){
-  df <- df %>% select(-except) # Remove the columns we don't to apply dropWhen to.
+    df <- df[!colnames(df) %in% except]# Remove the columns we don't to apply dropWhen to.
   }
 
   if (requireAll == FALSE){
