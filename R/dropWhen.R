@@ -42,7 +42,7 @@ dropWhen <- function(df, unique = FALSE, trash=NULL, requireAll = TRUE, except =
   filtered <- Filter(function(x)!all(is.na(x)), df)
   # filter the data frame to retain only columns that are not all NA
 
-  fullframe <- suppressMessages(left_join(filtered, extraColumns))
+  fullframe <- suppressMessages(dplyr::left_join(filtered, extraColumns))
 
   if(unique == TRUE) {
     # If unique rows are desired
