@@ -7,12 +7,12 @@ This package currently is wrapping a pile of functions commonly in use to intera
 You can install the most recent version of tgR by:
 
 ```r
-require(devtools)
-devtools::install_github('FredHutch/tgR')
+require(remotes)
+remotes::install_github('FredHutch/tgR')
 ```
 
 Install a specific release version (in this case v1.0) by:
 ```r
-require(devtools)
-devtools::install_github('FredHutch/tgR@v1.0')
+require(remotes)
+remotes::install_github('FredHutch/tgR@v1.0')
 ```
