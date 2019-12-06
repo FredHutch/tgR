@@ -25,7 +25,9 @@ Returns a columnn filtered data frame.  Note, does not take into account numeric
 Remove columns with specific trash
 }
 \examples{
-df <- data.frame(this = c(NA, seq(1, 5, 1), seq(1, 5, 1)), that = rep(0, 11), thisotherThing = rep(NA), ohAndThis = rep(c("trash", "0"), 11))
+df <- data.frame(this = c(NA, seq(1, 5, 1), seq(1, 5, 1)), that = rep(0, 11),
+thisotherThing = rep(NA),
+ohAndThis = rep(c("trash", "0"), 11))
 cleanerdf <- dropWhen(df, unique = FALSE, trash = c("0", "trash"), requireAll = FALSE)
 }
 \author{
