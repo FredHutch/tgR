@@ -23,7 +23,7 @@ cromwellSubmitBatch <-
       print("Submitting a batch workflow to Cromwell.")
 
     bodyList <- list(
-      wdlSource = httr::upload_file(WDL),
+      workflowSource = httr::upload_file(WDL),
       workflowInputs = httr::upload_file(Batch))
 
     if(is.null(Dependencies) == F) bodyList <- c(bodyList, workflowDependencies = list(httr::upload_file(Dependencies)))
