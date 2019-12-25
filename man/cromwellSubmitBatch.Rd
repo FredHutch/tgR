@@ -4,7 +4,7 @@
 \alias{cromwellSubmitBatch}
 \title{Submit a workflow job to Cromwell}
 \usage{
-cromwellSubmitBatch(WDL, Params = NULL, Batch, Options = NULL,
+cromwellSubmitBatch(WDL, Params, Batch = NULL, Options = NULL,
   Labels = NULL, Dependencies = NULL)
 }
 \arguments{

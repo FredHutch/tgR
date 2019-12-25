@@ -34,11 +34,11 @@ cromwellJobs <- function(days = 1) {
     if ("end" %in% colnames(cromTable) == T &
         "start" %in% colnames(cromTable) == T) {
       cromTable$start <-
-        as.POSIXct(cromTable$start, "UTC", "%Y-%m-%dT%H:%M:%S")
+        as.POSIXct(cromTable$start, "UTC", "%Y-%m-%dT%H:%M:%S") - 8*60*60 # because PST/hack
       cromTable$end <-
-        as.POSIXct(cromTable$end, "UTC", "%Y-%m-%dT%H:%M:%S")
+        as.POSIXct(cromTable$end, "UTC", "%Y-%m-%dT%H:%M:%S") - 8*60*60 # because PST/hack
       cromTable$submission <-
-        as.character(as.POSIXct(cromTable$submission, "UTC", "%Y-%m-%dT%H:%M:%S"))
+        as.character(as.POSIXct(cromTable$submission, "UTC", "%Y-%m-%dT%H:%M:%S") - 8*60*60 )# because PST/hack)
       cromTable$workflowDuration <-
         round(difftime(cromTable$end, cromTable$start, units = "mins"),
               3)
@@ -158,13 +158,13 @@ cromwellWorkflow <- function(workflow_id, expandSubWorkflows = F) {
       }
       #resultdf <- dplyr::mutate_all(resultdf, as.character)
       resultdf$submission <-
-        as.character(as.POSIXct(resultdf$submission, "UTC", "%Y-%m-%dT%H:%M:%S"))
+        as.character(as.POSIXct(resultdf$submission, "UTC", "%Y-%m-%dT%H:%M:%S") - 8*60*60 )# because PST/hack)
       if ("start" %in% colnames(resultdf) == T) {
         # if the workflow has started
         if (is.na(resultdf$start) == F) {
           # and if the value of start is not NA
           resultdf$start <-
-            as.POSIXct(resultdf$start, "UTC", "%Y-%m-%dT%H:%M:%S")
+            as.POSIXct(resultdf$start, "UTC", "%Y-%m-%dT%H:%M:%S") - 8*60*60 # because PST/hack
         } else {
           # if start is NA, then make sure it's set to NA????  Stupid.
           resultdf$start <- NA
@@ -174,7 +174,7 @@ cromwellWorkflow <- function(workflow_id, expandSubWorkflows = F) {
           if (is.na(resultdf$end) == F) {
             # and it is not NA
             resultdf$end <-
-              as.POSIXct(resultdf$end, "UTC", "%Y-%m-%dT%H:%M:%S")
+              as.POSIXct(resultdf$end, "UTC", "%Y-%m-%dT%H:%M:%S") - 8*60*60 # because PST/hack
             resultdf <-
               dplyr::mutate(resultdf, workflowDuration = round(difftime(end, start, units = "mins"), 3))
           }
@@ -246,7 +246,7 @@ cromwellCall <- function(workflow_id, expandSubWorkflows = F) {
         )
       ), as = "parsed")
   }
-
+  if(is.character(crommetadata) == T) stop(crommetadata)
   if (is.list(crommetadata$calls) == T) {
     # if the workflow has made calls, nab them
     bob <- purrr::pluck(crommetadata, "calls")
@@ -293,11 +293,11 @@ cromwellCall <- function(workflow_id, expandSubWorkflows = F) {
       if ("start" %in% colnames(justCalls) == T) {
         # if the workflow has started
         justCalls$start <-
-          as.POSIXct(justCalls$start, "UTC", "%Y-%m-%dT%H:%M:%S")
+          as.POSIXct(justCalls$start, tz = "UTC", "%Y-%m-%dT%H:%M:%S") - 8*60*60 # because PST/hack
         if ("end" %in% colnames(justCalls) == T) {
           # and if end is present
           justCalls$end <-
-            as.POSIXct(justCalls$end, "UTC", "%Y-%m-%dT%H:%M:%S")
+            as.POSIXct(justCalls$end, tz = "UTC", "%Y-%m-%dT%H:%M:%S") - 8*60*60 # because PST/hack
           justCalls <-
             dplyr::mutate(justCalls, callDuration = round(difftime(end, start, units = "mins"), 3))
         } else {
@@ -367,11 +367,11 @@ cromwellCall <- function(workflow_id, expandSubWorkflows = F) {
     #         if ("start" %in% colnames(justCallsSub) == T) {
     #           # if the workflow has started
     #           justCallsSub$start <-
-    #             as.POSIXct(justCallsSub$start, "UTC", "%Y-%m-%dT%H:%M:%S")
+    #             as.POSIXct(justCallsSub$start, "UTC", "%Y-%m-%dT%H:%M:%S") - 8*60*60 # because PST/hack
     #           if ("end" %in% colnames(justCallsSub) == T) {
     #             # and if end is present
     #             justCallsSub$end <-
-    #               as.POSIXct(justCallsSub$end, "UTC", "%Y-%m-%dT%H:%M:%S")
+    #               as.POSIXct(justCallsSub$end, "UTC", "%Y-%m-%dT%H:%M:%S") - 8*60*60 # because PST/hack
     #             justCallsSub <-
     #               dplyr::mutate(justCallsSub, callDuration = round(difftime(end, start, units = "mins"), 3))
     #           } else {

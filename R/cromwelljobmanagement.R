@@ -16,20 +16,20 @@
 #' TBD
 #' @export
 cromwellSubmitBatch <-
-  function(WDL, Params=NULL, Batch, Options=NULL, Labels=NULL, Dependencies = NULL) {
+  function(WDL, Params, Batch=NULL, Options=NULL, Labels=NULL, Dependencies = NULL) {
     if("" %in% Sys.getenv("CROMWELLURL")) {
       stop("CROMWELLURL is not set.")
     } else
       print("Submitting a batch workflow to Cromwell.")
 
     bodyList <- list(
-      wdlSource = httr::upload_file(WDL),
-      workflowInputs = httr::upload_file(Batch))
-
+      workflowSource = httr::upload_file(WDL),
+      workflowInputs = httr::upload_file(Params))
+    if(is.null(Labels) == F) bodyList <- c(bodyList, labels = list(jsonlite::toJSON(as.list(Labels), auto_unbox = TRUE)))
     if(is.null(Dependencies) == F) bodyList <- c(bodyList, workflowDependencies = list(httr::upload_file(Dependencies)))
     if(is.null(Options) == F) bodyList <- c(bodyList, workflowOptions = list(httr::upload_file(Options)))
     if(is.null(Labels) == F) bodyList <- c(bodyList, labels = list(jsonlite::toJSON(as.list(Labels), auto_unbox = TRUE)))
-    if(is.null(Params) == F) bodyList <- c(bodyList, workflowInputs_2 = list(httr::upload_file(Params)))
+    if(is.null(Batch) == F) bodyList <- c(bodyList, workflowInputs_2 = list(httr::upload_file(Batch)))
 
     cromDat <-
       httr::POST(
