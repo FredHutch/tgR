@@ -29,7 +29,7 @@ cromwellSubmitBatch <-
     if(is.null(Dependencies) == F) bodyList <- c(bodyList, workflowDependencies = list(httr::upload_file(Dependencies)))
     if(is.null(Options) == F) bodyList <- c(bodyList, workflowOptions = list(httr::upload_file(Options)))
     if(is.null(Labels) == F) bodyList <- c(bodyList, labels = list(jsonlite::toJSON(as.list(Labels), auto_unbox = TRUE)))
-    if(is.null(Batch) == F) bodyList <- c(bodyList, workflowInputs_2 = list(httr::upload_file(Batch)))
+    if(is.null(Params) == F) bodyList <- c(bodyList, workflowInputs_2 = list(httr::upload_file(Params)))
 
     cromDat <-
       httr::POST(
