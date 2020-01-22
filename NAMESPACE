@@ -3,7 +3,6 @@
 export("%>%")
 export(copyAnnotations)
 export(dropWhen)
-export(getAWSLogs)
 export(getDictionary)
 export(getTGRid)
 export(listS3Objects)
