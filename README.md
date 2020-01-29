@@ -4,6 +4,11 @@ This package currently is wrapping a pile of functions commonly in use to intera
 
 ## Installation
 
+You will need the following packages installed as well:
+```{r}
+install.packages(pkgs = c("httr", "REDCapR", "aws.s3", "jsonlite", "magrittr", "dplyr", "purrr", "RCurl", "checkmate", "stringr"))
+```
+
 You can install the most recent version of tgR by:
 
 ```r
