@@ -1,28 +1,25 @@
 #' Pull the list(s) of objects and tags in S3
 #'
-#' Pulls Information from the results of s3tagcrawler for TGR that are in an S3 bucket, including the object list and their tags as well as size metadata.
+#' Pulls metadata about all files in S3 that are accessible to the Repository such as tags, name, and sizes.
 #'
 #' @param bucket A character vector containing the full names of the S3 bucket(s) containing the data to return.
 #' @return Returns a long form data frame of objects in the indicated S3 bucket(s).
 #' @author Amy Paguirigan
 #' @details
-#' Requires valid S3 credentials to be set in the environment by setCreds.
+#' Requires valid S3 credentials to be set in the environment by setCreds (now "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY").
 #' @export
 listS3Objects <- function(bucket) {
-  if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
+  if ("" %in% Sys.getenv(c("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"))) {
     stop("You have missing environment variables.  Please setCreds().")
     } else message("Credentials set successfully.")
-  if(Sys.getenv("AWS_ACCESS_KEY_ID") == "") {
-    Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
-               AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
-               AWS_DEFAULT_REGION = "us-west-2")} # only set them if they are unset
 
     message("Pulling S3 tag list(s).")
     if (bucket == "fh-pi-paguirigan-a-genomicsrepo") {
       keys <- aws.s3::get_bucket_df(bucket = bucket,
                                     prefix = "apptags/meta/")$Key
+      keys <- keys[grepl("*.listing.csv", keys)]
     } else {
-      keys <- paste0("tg/apptags/", bucket, "-meta.csv") }
+      keys <- paste0("tg/apptags/", bucket, "-listing.csv") }
 
     s3tags <- purrr::map_dfr(keys, function(x) {
       aws.s3::s3read_using(utils::read.csv, stringsAsFactors = F,
@@ -41,13 +38,9 @@ listS3Objects <- function(bucket) {
 #' Requires valid S3 credentials to be set in the environment by setCreds.
 #' @export
 summarizeS3Objects <- function(bucket) {
-  if ("" %in% Sys.getenv(c("S3A", "S3SA"))) {
+  if ("" %in% Sys.getenv(c("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"))) {
     stop("You have missing environment variables.  Please setCreds().")
-    } else message("Credentials set successfully.")
-  if(Sys.getenv("AWS_ACCESS_KEY_ID") == "") {
-  Sys.setenv(AWS_ACCESS_KEY_ID = Sys.getenv("S3A"),
-             AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"),
-             AWS_DEFAULT_REGION = "us-west-2")}
+  } else message("Credentials set successfully.")
 
   message("Pulling S3 object summary.")
 
