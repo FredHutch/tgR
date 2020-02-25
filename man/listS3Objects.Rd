@@ -13,10 +13,10 @@ listS3Objects(bucket)
 Returns a long form data frame of objects in the indicated S3 bucket(s).
 }
 \description{
-Pulls Information from the results of s3tagcrawler for TGR that are in an S3 bucket, including the object list and their tags as well as size metadata.
+Pulls metadata about all files in S3 that are accessible to the Repository such as tags, name, and sizes.
 }
 \details{
-Requires valid S3 credentials to be set in the environment by setCreds.
+Requires valid S3 credentials to be set in the environment by setCreds (now "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY").
 }
 \author{
 Amy Paguirigan

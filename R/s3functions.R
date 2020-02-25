@@ -16,7 +16,7 @@ listS3Objects <- function(bucket) {
     message("Pulling S3 tag list(s).")
     if (bucket == "fh-pi-paguirigan-a-genomicsrepo") {
       keys <- aws.s3::get_bucket_df(bucket = bucket,
-                                    prefix = "apptags/meta/")$Key
+                                    prefix = "tg/apptags/")$Key
       keys <- keys[grepl("*.listing.csv", keys)]
     } else {
       keys <- paste0("tg/apptags/", bucket, "-listing.csv") }
@@ -45,7 +45,7 @@ summarizeS3Objects <- function(bucket) {
   message("Pulling S3 object summary.")
 
   if (bucket == "fh-pi-paguirigan-a-genomicsrepo") {
-    keys <- aws.s3::get_bucket_df(bucket = bucket, prefix = "apptags/summary/")$Key
+    keys <- aws.s3::get_bucket_df(bucket = bucket, prefix = "tg/apptags/summary/")$Key
   } else {
     keys <- paste0("tg/apptags/", bucket, "-summary.csv") }
 
