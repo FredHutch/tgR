@@ -9,7 +9,7 @@
 #' @details Requires valid credentials to be set in the environment with setCreds() and to have write priviledges to the data
 #' @export
 copyAnnotations <- function(copyFrom = NULL, copyTo = NULL, type = c("submission", "study"), overwriteExisting = FALSE) {
-  if ("" %in% Sys.getenv(c("REDURI", "S3A", "S3SA", "TGR"))) {
+  if ("" %in% Sys.getenv(c("TGR", "REDURI"))) {
     stop("You have missing environment variables.  Please set creds in env vars.")}
   else message("Credentials set successfully.")
 

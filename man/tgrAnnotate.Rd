@@ -4,8 +4,7 @@
 \alias{tgrAnnotate}
 \title{Queries TGR REDCap for dataset annotations}
 \usage{
-tgrAnnotate(DAG = NULL, harmonizedOnly = FALSE,
-  evenEmptyCols = FALSE)
+tgrAnnotate(DAG = NULL, harmonizedOnly = FALSE, evenEmptyCols = FALSE)
 }
 \arguments{
 \item{DAG}{(admin only) A character vector contining the name(s) of the TGR data access group(s) for which to request data, or "all".}

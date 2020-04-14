@@ -4,8 +4,7 @@
 \alias{dropWhen}
 \title{Remove columns with specific trash}
 \usage{
-dropWhen(df, unique = FALSE, trash = NULL, requireAll = TRUE,
-  except = NULL)
+dropWhen(df, unique = FALSE, trash = NULL, requireAll = TRUE, except = NULL)
 }
 \arguments{
 \item{df}{Data frame to column filter}

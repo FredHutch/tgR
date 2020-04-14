@@ -6,7 +6,7 @@
 #' @details Requires valid admin credentials to be set in the environment with setCreds()
 #' @export
 getTGRid <- function(DAG = NULL) {
-    if ("" %in% Sys.getenv(c("REDURI", "S3A", "S3SA", "TGR"))) {
+    if ("" %in% Sys.getenv(c("REDURI", "TGR"))) {
         stop("You have missing environment variables.  Please set creds in env vars.")}
     else message("Credentials set successfully.")
 

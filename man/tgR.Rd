@@ -3,7 +3,6 @@
 \docType{package}
 \name{tgR}
 \alias{tgR}
-\alias{tgR-package}
 \title{tgR: A convenience package for the Translational Genomics Repository.}
 \description{
 This package provides helper functions needed to coordinate between various aspects of repository.

@@ -25,7 +25,7 @@ tgrDefinitions <- function() {
 #' Requires **admin** REDCap credentials to be set in the environment.
 #' @export
 undefinedAnnotations <- function() {
-  if ("" %in% Sys.getenv(c("REDURI", "TGR", "S3A", "S3SA"))) {
+  if ("" %in% Sys.getenv(c("TGR", "REDURI"))) {
     stop("You have missing environment variables.  Please set creds in env vars.")}
   else message("Credentials set successfully.")
   commonKnowledge <- tgrDefinitions()
@@ -66,7 +66,7 @@ undefinedAnnotations <- function() {
 #' Requires **admin** REDCap credentials to be set in the environment.
 #' @export
 unusedAnnotations <- function() {
-  if ("" %in% Sys.getenv(c("REDURI", "TGR", "S3A", "S3SA"))) {
+  if ("" %in% Sys.getenv(c( "TGR", "REDURI"))) {
     stop("You have missing environment variables.  Please set creds in env vars.")}
   else message("Credentials set successfully.")
   commonKnowledge <- tgrDefinitions()

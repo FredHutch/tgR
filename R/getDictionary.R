@@ -7,7 +7,7 @@
 #' Requires setCreds() to have been run successfully.
 #' @export
 getDictionary <- function() {
-  if ("" %in% Sys.getenv(c("REDURI", "TGR", "S3A", "S3SA"))) {
+  if ("" %in% Sys.getenv(c( "TGR", "REDURI"))){
     stop("You have missing environment variables.  Please set creds in env vars.")}
   else message("Credentials set successfully.")
 

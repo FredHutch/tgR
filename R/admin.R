@@ -14,9 +14,9 @@
 #' Some conditions may require **admin** REDCap credentials to be set in the environment.
 #' @export
 validIdentifiers <- function(x, type, DAG = NULL) {
-  if ("" %in% Sys.getenv(c("REDURI", "S3A", "S3SA", "TGR"))) {
+  if ("" %in% Sys.getenv(c( "TGR", "REDURI"))){
     stop("You have missing environment variables.  Please set creds in env vars.")}
-  else message("Credentials set successfully.")
+    else message("Credentials set successfully.")
 
   if (is.null(DAG) == TRUE) {
     usedIDs <- suppressMessages(REDCapR::redcap_read_oneshot(

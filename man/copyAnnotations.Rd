@@ -4,8 +4,12 @@
 \alias{copyAnnotations}
 \title{Copy annotations from another record}
 \usage{
-copyAnnotations(copyFrom = NULL, copyTo = NULL,
-  type = c("submission", "study"), overwriteExisting = FALSE)
+copyAnnotations(
+  copyFrom = NULL,
+  copyTo = NULL,
+  type = c("submission", "study"),
+  overwriteExisting = FALSE
+)
 }
 \arguments{
 \item{copyFrom}{The molecular_id of the record to copy data from}
