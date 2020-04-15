@@ -29,29 +29,33 @@ undefinedAnnotations <- function() {
     stop("You have missing environment variables.  Please set creds in env vars.")}
   else message("Credentials set successfully.")
   commonKnowledge <- tgrDefinitions()
-  sciMeta <- tgrAnnotate(harmonizedOnly = T, DAG = "all", evenEmptyCols = T)
+  annotationsOnly <- commonKnowledge %>% dplyr::select(-c("Value", "ValueDescription", "bioScale", "centralDogma", "genomeScale", "DiseaseSpecific")) %>% unique()
+  sciMeta <- tgrAnnotate(harmonizedOnly = F, DAG = "all", evenEmptyCols = T)
   # Remove project memberships
   defineMe <- sciMeta %>% dplyr::select(-dplyr::starts_with("data_is_"))
   categorical <- commonKnowledge %>% dplyr::filter(Type == "categorical")
   noLevelAnnots <- commonKnowledge %>% dplyr::filter(Type != "categorical")
 
-  usedAnnots <- purrr::map_dfr(colnames(defineMe), function(x){
-    Y <- unique(dplyr::select(defineMe, x))
+  # Find all values used in the project, and find their associated Annotation
+  usedAnnots <- purrr::map_dfr(colnames(defineMe), function(i){
+    Y <- unique(dplyr::select(defineMe, tidyselect::all_of(i)))
     colnames(Y) <- "Value"
     Y$Value <- as.character(Y$Value)
-    Y$Annotation <- x
+    Y$Annotation <- i
     Y
   })
-
-  usedCat <- usedAnnots %>% dplyr::filter(Annotation %in% categorical$Annotation & is.na(Value) !=T)
+  #categorical annotations
+  usedCat <- usedAnnots %>% dplyr::filter(Annotation %in% categorical$Annotation & is.na(Value) !=T )
   missingCat <- dplyr::anti_join(usedCat, categorical)
+  missingCat <- dplyr::left_join(missingCat, annotationsOnly) %>% dplyr::mutate(ValueDescription = "")
 
-  usedOther <- usedAnnots %>% dplyr::filter(!Annotation %in% categorical$Annotation) %>% dplyr::select(Annotation) %>% unique()
-  missingOther <- dplyr::anti_join(usedOther, noLevelAnnots)
+  usedOther <- usedAnnots %>% dplyr::filter(!Annotation %in% categorical$Annotation) %>% select(Annotation) %>% unique()
+  missingOther <- dplyr::left_join(usedOther, commonKnowledge) %>% dplyr::filter(is.na(AnnotationDescription) == T) %>% select(Annotation)
+  missingOther <- dplyr::left_join(missingOther, annotationsOnly) %>% dplyr::mutate(Value = "", ValueDescription = "")
 
-  makeMeaning <- dplyr::full_join(missingCat, missingOther)
+  makeMeaning <- rbind(missingCat, missingOther)
 
-  suppressWarnings(makeMeaning <- dplyr::bind_rows(commonKnowledge[0,], makeMeaning)) # make a sample data frame to fill in
+  #suppressWarnings(makeMeaning <- dplyr::bind_rows(commonKnowledge[0,], makeMeaning)) # make a sample data frame to fill in
 
   return(makeMeaning)
 }
