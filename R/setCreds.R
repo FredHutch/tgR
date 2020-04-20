@@ -8,6 +8,7 @@
 #' Requires the desired REDCap and S3 credentials to be set in the environment or be available in an R file specified.
 #' @export
 setCreds <- function(path, tokenSet="file") {
+
 	if (tokenSet == "file"){
 		source(path);
   }
@@ -18,13 +19,15 @@ setCreds <- function(path, tokenSet="file") {
     Sys.setenv(AWS_ACCESS_KEY_ID=Sys.getenv("PAGAACCESS2"))
     Sys.setenv(AWS_SECRET_ACCESS_KEY=Sys.getenv("PAGASECRET2"))
   }
-  Sys.setenv(REDURI="https://cdsweb07.fhcrc.org/redcap/api/")
+
   if ("" %in% Sys.getenv(c("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"))) {
     # if the person is still using the old set of creds, repurpose them
     Sys.setenv(AWS_ACCESS_KEY_ID= Sys.getenv("S3A"),
              AWS_SECRET_ACCESS_KEY = Sys.getenv("S3SA"))
     }
   Sys.setenv(AWS_DEFAULT_REGION = "us-west-2")
+  Sys.setenv(REDURI="http://redcap.fredhutch.org/api")
+
   if ("" %in% Sys.getenv(c("REDURI", "TGR", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION"))) {
     stop("You have missing environment variables.  Please set env vars.")} else message("Credentials set successfully.")
 }
