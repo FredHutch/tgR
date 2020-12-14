@@ -4,16 +4,18 @@
 \alias{listS3Objects}
 \title{Pull the list(s) of objects and tags in S3}
 \usage{
-listS3Objects(bucket)
+listS3Objects(bucket, prefix = "tg")
 }
 \arguments{
-\item{bucket}{A character vector containing the full names of the S3 bucket(s) containing the data to return.}
+\item{bucket}{The name of the S3 bucket containing the data to return.}
+
+\item{prefix}{The prefix of the data being indexed by the TGR (default: "tg").}
 }
 \value{
-Returns a long form data frame of objects in the indicated S3 bucket(s).
+Returns a long form data frame of objects in the indicated S3 bucket.
 }
 \description{
-Pulls metadata about all files in S3 that are accessible to the Repository such as tags, name, and sizes.
+Pulls metadata about all files in S3 that are accessible, such as tags, name, and sizes.
 }
 \details{
 Requires valid S3 credentials to be set in the environment by setCreds (now "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY").
