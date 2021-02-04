@@ -4,10 +4,12 @@
 \alias{summarizeS3Objects}
 \title{Pull a summary of objects in S3}
 \usage{
-summarizeS3Objects(bucket)
+summarizeS3Objects(bucket, prefix = "tg")
 }
 \arguments{
 \item{bucket}{A character vector containing the full names of the S3 bucket(s) containing the data to return.}
+
+\item{prefix}{The prefix of the data being indexed by the TGR (default: "tg").}
 }
 \value{
 Returns a data frame containing a summary of what objects are in the indicated S3 bucket(s).

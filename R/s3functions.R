@@ -33,12 +33,13 @@ listS3Objects <- function(bucket, prefix = "tg") {
 #' Pulls summary information from the apptags prefix in S3 for a given S3 bucket(s).
 #'
 #' @param bucket A character vector containing the full names of the S3 bucket(s) containing the data to return.
+#' @param prefix The prefix of the data being indexed by the TGR (default: "tg").
 #' @return Returns a data frame containing a summary of what objects are in the indicated S3 bucket(s).
 #' @author Amy Paguirigan
 #' @details
 #' Requires valid S3 credentials to be set in the environment by setCreds.
 #' @export
-summarizeS3Objects <- function(bucket) {
+summarizeS3Objects <- function(bucket, prefix = "tg") {
   if ("" %in% Sys.getenv(c("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"))) {
     stop("You have missing environment variables.  Please setCreds().")
   } else message("Credentials set successfully.")
@@ -48,7 +49,7 @@ summarizeS3Objects <- function(bucket) {
   if (bucket == "fh-pi-paguirigan-a-eco") {
     keys <- aws.s3::get_bucket_df(bucket = bucket, prefix = "tg/apptags/summary/")$Key
   } else {
-    keys <- paste0("tg/apptags/", bucket,"-", prefix, "-summary.csv") }
+    keys <- paste0("tg/apptags/summary/", bucket,"-", prefix, "-summary.csv") }
 
   s3summary <- purrr::map_dfr(keys, function(x) {
     aws.s3::s3read_using(utils::read.csv, stringsAsFactors = F,
