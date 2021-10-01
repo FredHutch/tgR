@@ -2,7 +2,7 @@
 % Please edit documentation in R/copyAnnotations.R
 \name{copyAnnotations}
 \alias{copyAnnotations}
-\title{Copy annotations from another record}
+\title{Copy annotations from another record in REDCap}
 \usage{
 copyAnnotations(
   copyFrom = NULL,
@@ -27,7 +27,7 @@ Results of the copy attempt including the data of the new record as well as the 
 Copies the study, specimen and assay material metadata from another record in the Repository
 }
 \details{
-Requires valid credentials to be set in the environment with setCreds() and to have write priviledges to the data
+Requires valid credentials to be set in the environment with setCreds() and to have write privileges to the data
 }
 \author{
 Amy Paguirigan

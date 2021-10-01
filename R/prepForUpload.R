@@ -18,13 +18,13 @@ validateUpload <- function(dataToValidate) {
         if ("molecular_id" %in% colnames(dataToValidate) == T) {
           dataToValidate[dataToValidate == "NA"] <- ""
           dataToValidate[is.na(dataToValidate) == T] <- ""
-      assessment <- REDCapR::validate_for_write(dataToValidate) # return whatever this gives you, possibly useless
-      allcolumns <- suppressMessages(getDictionary())
-      nonRequiredCols <- allcolumns[!allcolumns %in% c("molecular_id")]
-      invalid <- dataToValidate[!colnames(dataToValidate) %in% nonRequiredCols] # return columns that are named wrong
-      if (colnames(invalid) == "molecular_id") {invalid$molecular_id <- NULL}
-      valid <- dataToValidate[colnames(dataToValidate) %in% allcolumns] # return columns that are named correctly
-      results <- list(assessment = assessment, invalid = invalid, valid = valid)
+          assessment <- REDCapR::validate_for_write(dataToValidate) # return whatever this gives you, possibly useless
+          allcolumns <- suppressMessages(getDictionary())
+          nonRequiredCols <- allcolumns[!allcolumns %in% c("molecular_id")]
+          invalid <- dataToValidate[!colnames(dataToValidate) %in% nonRequiredCols] # return columns that are named wrong
+            if ( "molecular_id" %in% colnames(invalid)) {invalid$molecular_id <- NULL}
+              valid <- dataToValidate[colnames(dataToValidate) %in% allcolumns] # return columns that are named correctly
+              results <- list(assessment = assessment, invalid = invalid, valid = valid)
         } else {stop("Please provide a data frame with the column `molecular_id` to validate.")}
       }  else {stop("Please provide a data frame with more than 0 rows to validate.")}
     } else {stop("Please provide a data frame to validate.")}

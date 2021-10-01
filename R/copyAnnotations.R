@@ -1,4 +1,4 @@
-#' Copy annotations from another record
+#' Copy annotations from another record in REDCap
 #' @description Copies the study, specimen and assay material metadata from another record in the Repository
 #' @param copyFrom The molecular_id of the record to copy data from
 #' @param copyTo The molecular_id of the record to edit using copied data
@@ -6,7 +6,7 @@
 #' @param overwriteExisting Default to false.  If data exists in the record to edit, do you want to overwrite existing data?
 #' @return Results of the copy attempt including the data of the new record as well as the REDCap response.
 #' @author Amy Paguirigan
-#' @details Requires valid credentials to be set in the environment with setCreds() and to have write priviledges to the data
+#' @details Requires valid credentials to be set in the environment with setCreds() and to have write privileges to the data
 #' @export
 copyAnnotations <- function(copyFrom = NULL, copyTo = NULL, type = c("submission", "study"), overwriteExisting = FALSE) {
   if ("" %in% Sys.getenv(c("TGR", "REDURI"))) {

@@ -1,18 +1,4 @@
-#' Pull Current TGR Annotation and Value definitions
-#'
-#' @description Pulls current data about annotations from GitHub for use in annotating molecular data sets in the Repository.
-#' @return A data frame containing the current TGR Annotations, Values and their Definitions
-#' @author Amy Paguirigan
-#' @return Returns a data frame containing TGR metadata definitions.
-#' @details
-#' Nothing to see here.
-#' @export
-tgrDefinitions <- function() {
-  message("pulling annotations from the master branch of the tgr-annotations repo")
-  suppressMessages(commonKnowledge <- httr::content(httr::GET("https://raw.github.com/FredHutch/tgr-annotations/master/commonKnowledge.csv"),
-                                   as = "parsed", type = "text/csv"))
-  return(commonKnowledge)
-}
+
 
 
 #' (Admin) Finds undefined REDCap variables
@@ -23,7 +9,6 @@ tgrDefinitions <- function() {
 #' @author Amy Paguirigan
 #' @details
 #' Requires **admin** REDCap credentials to be set in the environment.
-#' @export
 undefinedAnnotations <- function() {
   if ("" %in% Sys.getenv(c("TGR", "REDURI"))) {
     stop("You have missing environment variables.  Please set creds in env vars.")}
@@ -49,8 +34,8 @@ undefinedAnnotations <- function() {
   missingCat <- dplyr::anti_join(usedCat, categorical)
   missingCat <- dplyr::left_join(missingCat, annotationsOnly) %>% dplyr::mutate(ValueDescription = "")
 
-  usedOther <- usedAnnots %>% dplyr::filter(!Annotation %in% categorical$Annotation) %>% select(Annotation) %>% unique()
-  missingOther <- dplyr::left_join(usedOther, commonKnowledge) %>% dplyr::filter(is.na(AnnotationDescription) == T) %>% select(Annotation)
+  usedOther <- usedAnnots %>% dplyr::filter(!Annotation %in% categorical$Annotation) %>% dplyr::select(Annotation) %>% unique()
+  missingOther <- dplyr::left_join(usedOther, commonKnowledge) %>% dplyr::filter(is.na(AnnotationDescription) == T) %>% dplyr::select(Annotation)
   missingOther <- dplyr::left_join(missingOther, annotationsOnly) %>% dplyr::mutate(Value = "", ValueDescription = "")
 
   makeMeaning <- rbind(missingCat, missingOther)
