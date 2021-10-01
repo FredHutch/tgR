@@ -16,8 +16,8 @@ require(remotes)
 remotes::install_github('FredHutch/tgR')
 ```
 
-Install a specific release version (in this case v1.0) by:
+Install a specific release version (in this case v0.8.0) by:
 ```r
 require(remotes)
-remotes::install_github('FredHutch/tgR@v1.0')
+remotes::install_github('FredHutch/tgR@v0.8.0')
 ```
